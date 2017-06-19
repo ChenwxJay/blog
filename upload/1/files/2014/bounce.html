@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>JavaScript掉落弹起效果</title>
+</head>
+<body>
+<img src="http://chhblog.com/upload/1/images/2014/b2165db1495247a291d450991a8a8da9.jpg" id="image" style="position:absolute;" />
+<script type="text/javascript">
+function getScreenSize( target ) {
+    var theWidth
+	var theHeight;
+    if ( target.innerWidth ) { 
+	    theWidth = target.innerWidth 
+	    theHeight = target.innerHeight 
+    } else if ( target.document.compatMode=='CSS1Compat' ) { 
+	    theWidth = target.document.documentElement.clientWidth 
+	    theHeight = target.document.documentElement.clientHeight 
+    } else if ( target.document.body ) { 
+	    theWidth = target.document.body.clientWidth 
+	    theHeight = target.document.body.clientHeight 
+    } 
+    var result = { width: theWidth, height: theHeight};
+    return result;
+}
+
+ function bounce(t,b,c,d){
+	if ((t/=d) < (1/2.75)) {
+		return c*(7.5625*t*t) + b;
+	} else if (t < (2/2.75)) {
+		return c*(7.5625*(t-=(1.5/2.75))*t + .75) + b;
+	} else if (t < (2.5/2.75)) {
+		return c*(7.5625*(t-=(2.25/2.75))*t + .9375) + b;
+	} else {
+		return c*(7.5625*(t-=(2.625/2.75))*t + .984375) + b;
+	}
+}
+ 
+var apk2dcode = document.getElementById('image');
+var screenHeight = getScreenSize( window ).height;
+apk2dcode.onload = function() {
+	var t=0;
+	var b=0;
+	var c = screenHeight - apk2dcode.offsetHeight;
+	var d=100;
+	function run(){
+		apk2dcode.style.top = Math.ceil(bounce(t,b,c,d)) + "px";
+		if(t<d){ 
+			t++; setTimeout(run, 10); 
+		}
+	}
+	run();
+};
+
+</script>
+</body>
+</html>

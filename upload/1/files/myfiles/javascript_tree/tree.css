@@ -1,0 +1,171 @@
+﻿/*-=文件夹样式的树=-*/
+.tree div,.tree ul,.tree li {
+	margin: 0;
+	padding: 0;
+	font-size: 12px
+}
+
+.tree,.tree ul,.tree li {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	zoom: 1;
+}
+
+.tree li {
+	float: left;
+	clear: both;
+	width: 100%;
+}
+
+.tree ul {
+	_float: left;
+}
+
+.tree li ul {
+	padding-left: 20px;
+}
+
+.tree img {
+	width: 20px;
+	height: 20px;
+	border: none;
+	background:
+		url(http://www.chhblog.com/upload/1/files/c33064c709c9499fb90754b5acec0942.png)
+		no-repeat;
+	vertical-align: top;
+}
+
+.tree .root {
+	
+}
+
+.tree .root .dash {
+	background-position: -20px -40px;
+}
+
+.tree .root .dash-open {
+	background-position: 0 -40px;
+}
+
+.tree .root .icon,.tree .root .icon-open {
+	background-position: -160px -40px;
+}
+
+.tree .loading {
+	background:
+		url(http://www.chhblog.com/upload/1/files/c33064c709c9499fb90754b5acec0942.png)
+		no-repeat left 3px;
+	width: 20px;
+	height: 20px;
+	border: none;
+	vertical-align: top
+}
+
+/*-= 目录 =-*/
+.tree .folder {
+	background:
+		url(http://www.chhblog.com/upload/1/files/bcfff79aa1f348c09f3fb2c4bf8a6a00.gif)
+		0 21px repeat-y;
+}
+
+.tree .dash-f {
+	background-position: -240px -40px;
+}
+
+.tree .dash-f-open {
+	background-position: -200px -40px;
+}
+
+.tree .icon-f {
+	background-position: -120px -40px;
+}
+
+.tree .icon-f-open {
+	background-position: -140px -40px;
+}
+
+/*-= 目录树梢 =-*/
+.tree .dash-fl {
+	background-position: -100px -40px;
+}
+
+.tree .dash-fl-open {
+	background-position: -80px -40px;
+}
+
+.tree .icon-fl {
+	background-position: -120px -40px;
+}
+
+.tree .icon-fl-open {
+	background-position: -140px -40px;
+}
+
+/*-= 内容 =-*/
+.tree .dash-t {
+	background-position: -180px -40px;
+}
+
+.tree .icon-t {
+	background-position: -220px -40px;
+}
+
+/*-= 内容树梢 =-*/
+.tree .dash-tl {
+	background-position: -60px -40px;
+}
+
+.tree .icon-tl {
+	background-position: -220px -40px;
+}
+
+/*-=根目录文件夹=-*/
+.tree .dash-f-s-open {
+	background-position: 0px -40px;
+}
+
+.tree .dash-f-s {
+	background-position: -20px -40px;
+}
+
+/*-= 节点 =-*/
+.tree a,.tree a:visited {
+	text-decoration: none;
+	color: black;
+	font-size: 12px;
+	display: -moz-inline-box;
+	display: inline-block;
+	margin-top: 4px;
+	_margin-top: 5px;
+	border: 1px solid #fff;
+}
+
+.tree a:hover,.tree a:active {
+	background: none
+}
+
+.tree a.selected {
+	background: highlight;
+	color: white;
+}
+
+/*-=编辑节点=-*/
+.tree .add {
+	background-position: -280px -40px;
+	cursor: pointer;
+	display: none;
+}
+
+.tree .edit {
+	background-position: -300px -17px;
+	cursor: pointer;
+	display: none;
+}
+
+.tree .remove {
+	background-position: -320px 7px;
+	cursor: pointer;
+	display: none;
+}

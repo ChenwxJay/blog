@@ -1,0 +1,417 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>新浪微博@功能</title>
+<script type='text/javascript' src='http://code.jquery.com/jquery-1.8.0.min.js'></script>
+<style type='text/css'>
+div, ul, li, p{ margin:0; padding:0; list-style:none;}
+.content{ margin:0 auto; display:block;}
+#dialog{ width:200px; height:300px; border:1px solid #000; background:#fff; display:none;}
+#dialog ul li{ width:190px; height:25px; line-height:25px; border-bottom:1px solid #666 }
+#dialog ul li.selected{ background:blue; color:#fff;}
+</style>
+</head>
+<body>
+<div class='content'>
+<textarea id='content' class='content' rows='5' cols='50'></textarea>
+</div>
+
+<div id='dialog'>
+</div>
+
+<script type='text/javascript'>
+function insertText( editor, value) {
+		if (!editor) return;
+		editor.focus();
+		if (editor.document && editor.document.selection) {
+			var range = editor.document.selection.createRange();
+			var text = range.text;
+			while( text.indexOf( '@' ) != 0 ) {
+			    range.moveStart( 'character', -1 );
+				text = range.text;
+			}
+			range.moveStart( 'character', 1 );
+			range.text = value;
+		} else if (typeof editor.selectionStart != "undefined") {
+			var start = editor.selectionStart;
+            var str = editor.value.substr( 0, start );
+            while( !/@$/.test( str ) ) {
+                start -= 1;
+				editor.selectionStart = start;
+				str = editor.value.substr( 0, start );
+			}			
+            var end = editor.selectionEnd;
+			var allstr = editor.value;
+			editor.value = str.substr(0, start) + value +
+				editor.value.substring(end, allstr.length);
+			editor.selectionStart = start + value.length;
+			editor.selectionEnd = start + value.length;			
+		}
+}
+
+(function() {
+    window[ 'getCursorPosition' ] = function( el ) {
+	    return getCursorPosition.getInputPositon( el );
+	}
+
+	var getCursorPosition = {
+		/**
+		* 获取输入光标在页面中的坐标
+		* @param        {HTMLElement}    输入框元素        
+		* @return        {Object}        返回left和top,bottom
+		*/
+		getInputPositon: function (elem) {
+			if (document.selection) {   //IE Support
+				elem.focus();
+				var Sel = document.selection.createRange();
+				return {
+					left: Sel.boundingLeft,
+					top: Sel.boundingTop,
+					bottom: Sel.boundingTop + Sel.boundingHeight
+				};
+			} else {
+				var that = this;
+				var cloneDiv = '{$clone_div}', cloneLeft = '{$cloneLeft}', cloneFocus = '{$cloneFocus}', cloneRight = '{$cloneRight}';
+				var none = '<span style="white-space:pre-wrap;"> </span>';
+				var div = elem[cloneDiv] || document.createElement('div'), focus = elem[cloneFocus] || document.createElement('span');
+				var text = elem[cloneLeft] || document.createElement('span');
+				var offset = that._offset(elem), index = this._getFocus(elem), focusOffset = { left: 0, top: 0 };
+
+				if (!elem[cloneDiv]) {
+					elem[cloneDiv] = div, elem[cloneFocus] = focus;
+					elem[cloneLeft] = text;
+					div.appendChild(text);
+					div.appendChild(focus);
+					document.body.appendChild(div);
+					focus.innerHTML = '|';
+					focus.style.cssText = 'display:inline-block;width:0px;overflow:hidden;z-index:-100;word-wrap:break-word;word-break:break-all;';
+					div.className = this._cloneStyle(elem);
+					div.style.cssText = 'visibility:hidden;display:inline-block;position:absolute;z-index:-100;word-wrap:break-word;word-break:break-all;overflow:hidden;';
+				};
+				div.style.left = this._offset(elem).left + "px";
+				div.style.top = this._offset(elem).top + "px";
+				var strTmp = elem.value.substring(0, index).replace(/</g, '<').replace(/>/g, '>').replace(/\n/g, '<br/>').replace(/\s/g, none);
+				text.innerHTML = strTmp;
+
+				focus.style.display = 'inline-block';
+				try { focusOffset = this._offset(focus); } catch (e) { };
+				focus.style.display = 'none';
+				return {
+					left: focusOffset.left,
+					top: focusOffset.top,
+					bottom: focusOffset.bottom
+				};
+			}
+		},
+
+		// 克隆元素样式并返回类
+		_cloneStyle: function (elem, cache) {
+			if (!cache && elem['${cloneName}']) return elem['${cloneName}'];
+			var className, name, rstyle = /^(number|string)$/;
+			var rname = /^(content|outline|outlineWidth)$/; //Opera: content; IE8:outline && outlineWidth
+			var cssText = [], sStyle = elem.style;
+
+			for (name in sStyle) {
+				if (!rname.test(name)) {
+					val = this._getStyle(elem, name);
+					if (val !== '' && rstyle.test(typeof val)) { // Firefox 4
+						name = name.replace(/([A-Z])/g, "-$1").toLowerCase();
+						cssText.push(name);
+						cssText.push(':');
+						cssText.push(val);
+						cssText.push(';');
+					};
+				};
+			};
+			cssText = cssText.join('');
+			elem['${cloneName}'] = className = 'clone' + (new Date).getTime();
+			this._addHeadStyle('.' + className + '{' + cssText + '}');
+			return className;
+		},
+
+		// 向页头插入样式
+		_addHeadStyle: function (content) {
+			var style = this._style[document];
+			if (!style) {
+				style = this._style[document] = document.createElement('style');
+				document.getElementsByTagName('head')[0].appendChild(style);
+			};
+			style.styleSheet && (style.styleSheet.cssText += content) || style.appendChild(document.createTextNode(content));
+		},
+		_style: {},
+
+		// 获取最终样式
+		_getStyle: 'getComputedStyle' in window ? function (elem, name) {
+			return getComputedStyle(elem, null)[name];
+		} : function (elem, name) {
+			return elem.currentStyle[name];
+		},
+
+		// 获取光标在文本框的位置
+		_getFocus: function (elem) {
+			var index = 0;
+			if (document.selection) {// IE Support
+				elem.focus();
+				var Sel = document.selection.createRange();
+				if (elem.nodeName === 'TEXTAREA') {//textarea
+					var Sel2 = Sel.duplicate();
+					Sel2.moveToElementText(elem);
+					var index = -1;
+					while (Sel2.inRange(Sel)) {
+						Sel2.moveStart('character');
+						index++;
+					};
+				}
+				else if (elem.nodeName === 'INPUT') {// input
+					Sel.moveStart('character', -elem.value.length);
+					index = Sel.text.length;
+				}
+			}
+			else if (elem.selectionStart || elem.selectionStart == '0') { // Firefox support
+				index = elem.selectionStart;
+			}
+			return (index);
+		},
+
+		// 获取元素在页面中位置
+		_offset: function (elem) {
+			var box = elem.getBoundingClientRect(), doc = elem.ownerDocument, body = doc.body, docElem = doc.documentElement;
+			var clientTop = docElem.clientTop || body.clientTop || 0, clientLeft = docElem.clientLeft || body.clientLeft || 0;
+			var top = box.top + (self.pageYOffset || docElem.scrollTop) - clientTop, left = box.left + (self.pageXOffset || docElem.scrollLeft) - clientLeft;
+			return {
+				left: left,
+				top: top,
+				right: left + box.width,
+				bottom: top + box.height
+			};
+		}
+	};
+
+})();
+
+var DataSource = function() {
+    
+	this.request = function( keywords, callback ) {
+	    var ajaxOption = new Object;
+		ajaxOption.url = '';
+		ajaxOption.data = { keywords: keywords };
+		ajaxOption.type = 'GET';
+		ajaxOption.type = 'JSON';
+		ajaxOption.success = function( data ) {
+		    if( typeof( callback ) == 'function' ) {
+				var data = [
+						"abcdefg",
+						"1234567",
+						"abcdefg",
+						"1234567",
+						"abcdefg",
+						"1234567",
+						"abcdefg",
+						"1234567",
+						"abcdefg",
+						"1234567"		
+					];			
+				data.keywords = keywords;
+			    callback( data );
+			}
+		}
+		$.ajax( ajaxOption );
+	}
+} 
+
+
+var OPEN = 0;
+var CLOSE = 1;
+
+var Dialog = function( placeholderid ) {
+    
+	var placeholder = $( document.getElementById( placeholderid ) );
+	
+	var data;
+	var maxIndex;
+	var currentIndex;
+	var self = this;
+	var eventState = false;
+    
+	//按下回来键后触发的事件
+	this.entered = new Function( 'data', '' );
+	
+	this.load = function( d ) {		
+		data = d;
+		maxIndex = data.length - 1;
+		currentIndex = 0;
+	
+		placeholder.html( getHtml() );
+		refreshDialog();
+	}
+	
+	this.show = function( left, top ) {
+	    placeholder.css({
+		    'position': 'absolute',
+			'left': left,
+			'top': top, 
+			'display': 'block'
+		});
+		
+		if( !eventState ) bindKeyEvent();
+	}
+	
+	this.getStatus = function() {
+	    return placeholder.css( 'display' ) == 'none' ? CLOSE : OPEN; 
+	}
+	
+	this.hide = function() {
+	    placeholder.hide();  
+		unbindKeyEvent();
+	}
+	
+	var getHtml = function() {
+	    var html = '';
+	    for( var i = 0; i < data.length; i ++ ) {
+		    html += '<li> ' + data[ i ] + ' </li>';
+		}
+		html = '<ul>' + html + '</ul>';
+		html = '<p>关键字：' + data.keywords +'</p>' + html;
+		return html;
+	}
+		
+	
+	var refreshDialog = function() {
+	    var elItems = placeholder.find( 'ul li' );
+		elItems.removeClass( 'selected' );
+		$( elItems[ currentIndex ] ).addClass( 'selected' );
+	}
+	
+	var moveNext = function() {
+	    if( currentIndex == maxIndex ) {
+		    currentIndex = 0;
+		} else {
+		    currentIndex ++;
+		}
+		
+		refreshDialog();
+	}
+	
+	var movePrev = function() {
+	    if( currentIndex == 0 ) {
+		    currentIndex = maxIndex
+		} else {
+		    currentIndex --;
+		}
+		
+		refreshDialog();
+	}
+	
+	var enter = function() {
+	    self.hide();
+		var selectedItem = data[ currentIndex ];
+		self.entered( selectedItem );
+	}
+	
+	var keyEvent = function( e ) {
+		var keycode = e.keyCode;
+		switch( keycode ) {
+			//向上
+			case 38:
+				movePrev();
+				break;
+			//向下
+			case 40:
+				moveNext();
+				break;
+			//回来
+			case 13:
+				enter();
+				break;
+		}	
+	}
+	
+	var bindKeyEvent = function() {
+	    $(document).bind( 'keydown', keyEvent );
+		eventState = true;
+	}
+	
+	var unbindKeyEvent = function() {
+		$(document).unbind( 'keydown', keyEvent );
+	    eventState = false; 
+	}
+	
+}
+
+var AnalyzeText = function( input, datasource, dialog ) {
+     var editor = input;
+     var self = this;	 
+	 	 
+	 this.moved = new Function( 'keywords', '' );
+	 
+	 var bindKeyEvent = function() {		
+		$(editor).bind( 'keydown', function( e ) {
+		    var keycode = e.keyCode;
+
+			if( keycode == 38 || keycode == 40 ) {
+			    e.preventDefault()
+			}
+			
+			if( keycode == 13 && dialog.getStatus() == OPEN ) {
+				e.preventDefault();
+			}
+		});
+		
+	    $(editor).bind( 'keyup', function( e ) {
+			var keycode = e.keyCode;
+			if( keycode != 37 && keycode != 39 ) return;
+
+			if ( editor.document && editor.document.selection ) {
+					var range = editor.document.selection.createRange();
+					var clone = range.duplicate();
+					clone.moveStart( 'character', -editor.value.length );
+					text = clone.text;
+			} else if ( typeof editor.selectionStart != 'undefined' ) {
+					var pos = editor.selectionStart;
+					text = editor.value.substring( 0, pos );
+			}
+			
+			var regex = /@(?=[^@]*)([^@]*)$/;
+			var match = regex.exec( text );
+			if( match != null ) {
+			    text = match[ 1 ];
+			    if( text == '' ) text = '匹配到了@(@后面的位置)';
+				requestData( text );
+			} else {
+			    dialog.hide();
+			}
+		} );
+	 }
+	 
+	 var requestData = function( text ) {
+		datasource.request( text, function(data) {
+			var position = getCursorPosition( editor );
+			dialog.load( data );
+			dialog.show( position.left, position.bottom )
+		} )	 
+	 }
+	 
+	 bindKeyEvent();
+}
+
+
+var editor = document.getElementById( 'content' );
+
+var dialog = new Dialog( 'dialog' );
+dialog.entered = function( data ) {
+	insertText( editor, data );
+    //alert( '选中项内容为：' + data );
+}
+
+var datasource = new DataSource();
+
+var analyze = new AnalyzeText( editor, datasource, dialog );
+
+
+
+
+
+</script>
+
+</body>
+</html>

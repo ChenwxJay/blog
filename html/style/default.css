@@ -1,0 +1,31 @@
+*{margin:0; padding:0; font-size:12px; color:#333;}
+ul,li{ list-style-type: none;}
+
+.clear{ clear: both;}
+
+.head{ height: 60px; width: 100%; background-color:#F1F1F1;}
+.head .logo{ width: 198px; line-height: 60px; text-indent: 20px; float:left; height: 100%; }
+.head .logo a{font-size: 18px; font-weight: bold; text-decoration: none;}
+
+.head .search{ float: left; line-height: 60px;}
+.head .search input[type=text]{ border:1px solid rgba(0,0,0,.2);  width: 600px; padding: 7px 10px; font-size: 14px;}
+.head .search input[type=button]{ padding: 4px 8px; font-size: 14px; margin-left: 10px;}
+
+.content{ position: relative; padding-left: 198px; border-top:1px solid rgba(0,0,0,.1); margin-bottom: 30px; }
+.content .left{ width: 198px;margin-top: 10px; line-height: 28px; position: absolute;left: 0;top: 0;}
+.content .left>ul{ margin-left: 30px; }
+
+.content .right{ width: 100%;}
+.content .cate{ text-indent: 6px; height: 35px; line-height: 35px; font-size: 14px; width: 100%; border-bottom:1px solid rgba(0,0,0,.2);}
+
+.weixin_code{ position: fixed; right: 10px; top: 100px;}
+.weixin_code p{ font-size: 20px; font-weight: bold; text-align: center; margin-top: -20px; line-height: 35px;}
+
+a.big:link,a.big:visited{ font-size: 18px; line-height: 30px; font-weight: bold; color: #1155cc; margin-left: 10px; margin-top: 5px; display: inline-block; text-decoration: none;}
+a.big:hover,a.big:active{ text-decoration: underline;}
+a.small:link, a.small:visited{ text-decoration: none;}
+a.small:hover, a.small:active{ text-decoration: underline;}
+
+.page{  margin-left: 10px; margin-top: 5px; font-size: 18px;}
+.page span{ display: inline-block; padding:0 3px;}
+.page a:link,.page a:visited,.page a:hover,.page a:active{display: inline-block; padding:0 3px; text-decoration: underline;}

@@ -1,0 +1,374 @@
+﻿           <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <title></title>
+	<style type='text/css'>
+	div,h3{ margin:0 auto; list-style:none;}
+	.wrapper{ width:950px; height:950px; position:relative; float:left; margin-top:8px}
+	.wrapper .layer{ position:absolute;}
+	</style>
+  </head>
+  <body>
+    
+	<input type='text' size='80' id='url' value='http://www.chhblog.com/upload/1/images/demo/798b8af56b4a41a5b2115cbdb5ce06de.jpg'/>
+	<input type='radio' value='3' id='norm1' name='norm' checked/>
+	<label for='norm1'>3x3</label>
+	<input type='radio' value='4' id='norm2' name='norm'/>
+	<label for='norm2'>4x4</label>
+	<input type='button' value='自定义图片' onclick='startGame();'/>
+	<img id='imgData' style='display:none'/>
+	<div class='wrapper' id='wrapper'>
+	</div>
+    
+	<script type='text/javascript'>
+	(function(){
+	var magic = '$ROOT';
+	var root = window[magic] = {};
+	var uidCount = 0;
+
+	var UIBase = window["UIBase"] = function()
+	{
+		var self = this;
+		
+		var setGlobal = function(id ,obj)
+		{
+			root[id] = obj;
+			return magic + '[\''+ id +'\']';
+		}
+
+		var unsetGlobal = function(id)
+		{
+			delete root[id];
+		}
+
+		var formatHtml = function (tpl){
+			return (tpl
+				.replace(/##/g, self.id)
+				.replace(/\$\$/g, self._globalKey));
+		}    
+		
+		var initUIBase = function (){
+			self.id = '$UI'+ (++uidCount) ;
+			self._globalKey = setGlobal(self.id , self );
+		}
+		
+		this.render = function (holder){
+			var html = this.renderHtml();
+			var jquery = $(html);
+			$("#"+holder).append(jquery);
+		}
+		
+	  
+		this.renderReplace = function(target)
+		{
+		   target.replaceWith(this.renderHtml()); 
+		}
+		
+			
+		this.getDom = function (){
+		   return $(document.getElementById(this.id));
+		}
+		
+		this.getHtmlTpl = function (){
+			return '';
+		}
+		
+		this.renderHtml = function (){
+			return formatHtml(this.getHtmlTpl());
+		}
+		
+		this.dispose = function (){
+			var box = this.getDom();
+			box.remove();
+			unsetGlobal(this.id);
+		}
+		
+		initUIBase();
+	}})()
+	
+	var Drag = function(pop)
+	{
+		var element = pop.getElement();
+		var title = pop.getDragBar();
+		var elementX,elementY, pointX, pointY;
+		var currLeft , currTop;
+		var self = this;
+		
+		var mouseDown = function(e)
+		{
+			 title.css('cursor','move');
+			 $(document).bind('mousemove',mouseMove);
+			 $(document).bind('mouseup',mouseUp)		 
+			 elementX = currLeft = parseFloat(element.css('left'));
+			 elementY = currTop = parseFloat(element.css('top'));
+			 pointX = e.pageX;
+			 pointY = e.pageY;		 
+			 e.stopPropagation();
+			 e.preventDefault();
+			 if(typeof(self.onDown) == 'function') self.onDown(self);
+		}
+		
+		var mouseMove = function(e)
+		{
+			currLeft = elementX + e.pageX - pointX;
+			currTop = elementY + e.pageY - pointY
+			element.css('left',currLeft);
+			element.css('top',currTop);
+			e.stopPropagation();
+			e.preventDefault();
+			if(typeof(self.onMove) == 'function') self.onMove(self);
+		}
+		
+		var mouseUp = function(e)
+		{
+			title.css('cursor','default');
+			$(document).unbind('mousemove',mouseMove);
+			$(document).unbind('mouseup',mouseUp);
+			e.stopPropagation();
+			e.preventDefault();
+			if(typeof(self.onUp)=='function') self.onUp(self);		
+		}
+		
+		this.onUp = function(){};
+		this.onMove = function(){};
+		this.onDown = function(){};
+		
+		this.getLeft = function(){return currLeft};
+		this.getTop = function(){return currTop};	
+		
+		this.bind = function()
+		{
+		   title.bind('mousedown',mouseDown);
+		}
+		
+		this.unbind = function()
+		{
+		   title.unbind('mousedown', mouseDown);
+		}
+	}
+
+	 
+	 var Layer = function( num , bgPosition , size , bgUrl)
+	 {
+	    UIBase.call(this);
+		
+	    var self = this;
+		var end ;
+		var drag ;
+		
+		this.onMove = function(sender , currPoint){}
+		this.onUp = function(sender , currPoint){}
+		this.onDown = function(sender , currPoint){}
+		
+		this.getNum = function(){
+		    return num;
+		}
+		
+		this.setEnd = function(point)
+		{
+		    end = point;
+		}
+		
+		this.getEnd = function()
+		{
+		    return end;
+		}
+		
+		this.gotoEnd = function()
+		{
+		    this.getDom().animate( end , 400 );
+		}
+		
+		this.getHtmlTpl = function()
+		{
+		    return '<div num='+ this.getNum() +' id="##" class="layer" style="background-image:url('+ bgUrl +') ;background-position:'+ bgPosition.left  +'px '+ bgPosition.top+'px; width:'+ size.width +'px ; height : '+ size.height +'px"></div>';
+		}
+		
+		this.unbindDragEvent = function()
+		{
+		    drag.unbind();
+		}
+		
+		this.render = function(holder)
+		{			
+		    $('#'+holder).append($(this.renderHtml()));
+			this.getDom().css(end);
+			
+			var getPoint = function(drag)
+			{
+			    var point = {
+				    left : drag.getLeft(),
+					top : drag.getTop()
+				}
+				return point;
+			}
+			
+		    drag = new Drag({
+			    getElement:function(){return self.getDom();},
+				getDragBar: function(){ return self.getDom();}
+			});
+			
+			drag.onMove = function(drag)
+			{
+			    var point = getPoint(drag);
+				self.onMove(self , point);
+			}
+
+			drag.onUp = function(drag)
+			{
+			    var point = getPoint(drag);
+				self.onUp(self , point);
+			}
+			
+			drag.onDown = function(drag)
+			{
+			    var point = getPoint(drag);
+				self.onDown(self, point);
+			}
+			
+			drag.bind();	
+		}
+	 }
+	 
+	 
+	 var Puzzle = function(imgUrl , imgSize , norm)
+	 {
+	     var layers = new Array ;
+		 var isVictory = false;
+
+		 var onMove = function(sender , currPoint)
+		 {
+		    var ref ;
+		    for(var i = 0 ; i < layers.length ; i ++)
+			{
+			    var layer = layers[i];
+			    var lp = layer.getEnd();
+				var cp = currPoint;
+				var transverse = cp.left - lp.left;
+				var vertical = cp.top - lp.top;
+				transverse = Math.abs(transverse);
+				vertical = Math.abs(vertical);
+				if(layer != sender && transverse <= 8 && transverse >=0 && vertical <=8 && vertical >=0)
+                {
+				    layer.setEnd(sender.getEnd());
+                    layer.gotoEnd();
+					sender.setEnd(lp);
+					ref = layer;
+					break;
+                }				
+			}
+			if(ref) swapLayer(sender , ref);
+		 }
+		 
+		 var swapLayer = function(layer1 , layer2)
+		 {
+		     var getIndex = function(layer)
+			 {
+			    for(var i = 0 ; i < layers.length ; i ++)
+				{
+				    if(layers[i] == layer) return i;
+				}
+			 }
+			 
+			 var index1 = getIndex(layer1);
+			 var index2 = getIndex(layer2);
+			 
+			 layers[index1] = layer2;
+			 layers[index2] = layer1;
+		 }
+		 
+		 var checkVictory = function()
+		 {
+		     isVictory = true;
+		     for(var i = 0 ; i < layers.length ; i ++)
+			 {
+			     if(layers[i].getNum() != i) isVictory = false;
+			 }
+			 if(isVictory)
+			 {
+			     alert('拼图成功');
+				 for(var i = 0 ; i < layers.length ; i ++)
+				 {
+				     layers[i].unbindDragEvent();
+				 }
+			 }
+		 }
+		 
+		 var onUp = function(sender , currPoint)
+		 {
+		    sender.gotoEnd();
+			checkVictory();
+		 }
+		 
+		 var onDown = function(sender , currPoint)
+		 {
+		    for(var i = 0 ; i < layers.length ; i ++)
+			{
+			    layers[i].getDom().css('z-index',0);
+			}
+			sender.getDom().css('z-index',1);
+		 }
+		 
+		 
+		 this.initialize = function()
+		 {
+			var getPoint = function(i)
+			{
+				var left = i % norm * layerWidth;
+				var top =  Math.floor(i / norm) * layerHeight;
+				return { left : left , top :  top }
+			}		 
+			 
+			var layerWidth = imgSize.width / norm;
+			var layerHeight = imgSize.height / norm;
+			
+			for(var i = 0 ; i < Math.pow(norm,2) ; i ++)
+			{
+			    var point = getPoint(i);
+                var bgPosition = {left : - point.left , top : - point.top};
+				var size = {width : layerWidth , height : layerHeight};
+                var layer = new Layer(i, bgPosition , size, imgUrl);		
+                layer.onMove = onMove;
+                layer.onUp = onUp;	
+                layer.onDown = onDown;							
+                layers.push(layer);					
+			}
+            
+			layers.sort(function(){
+			    return Math.ceil(Math.random() - Math.random());
+			})
+			
+			for(var i = 0 ; i < layers.length ; i ++)
+			{
+                var point = getPoint(i);
+                layers[i].setEnd(point);				
+    			layers[i].render('wrapper');
+			}
+		 }
+	 }
+	 
+
+	 function startGame()
+	 {
+	     $('#wrapper').empty();
+	     var url = $('#url').val();
+		 var norm = $('input[@name=norm]:checked').val();
+		 var img = document.getElementById('imgData');
+		 img.onload = function()
+		 {
+		     var width = $(this).width();
+			 var height = $(this).height();
+			 var g = new Puzzle(url , {width : width , height : height}, norm);
+			 g.initialize();
+		 }
+		 img.src = '';
+		 img.src = url;
+	 }
+	 
+	 startGame();
+	 
+	</script> 
+  </body>
+</html>
+        

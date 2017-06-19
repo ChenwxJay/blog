@@ -1,0 +1,534 @@
+﻿           <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>俄罗斯方块</title>
+    <style type="text/css">
+    div {display:block;background-color:black;position:absolute;font-size:17px;color:#fff; font-family:黑体}
+    span {float:left;background-color:gray;width:12px;height:12px;border:4px gray outset;margin:0 1 1 0;overflow:hidden;}
+    p {float:left;width:8px;height:8px;border:2px gray outset;overflow:hidden;margin:0;padding:0}
+    #main {width:375px;height:430px;display:block;background-color:gray;position:relative;}
+    #body {width:241px;height:401px;left:15px;top:15px;border:1px solid #999;}
+    #score {width:80px;height:24px;left:270px;top:15px;padding:4px;}
+    #level {width:80px;height:24px;left:270px;top:50px;padding:4px;}
+    #next {width:50px;height:50px;left:270px;top:85px;border:19px black solid;}
+    #ctrl {width:80px;height:55px;left:270px;top:360px;padding:4px;text-align:center;background-color:gray}
+    #ctrl button{width:80px;height:25px;}    
+    </style>
+    <script type="text/javascript">
+	var Grid = function(x,y,html)
+	{
+		this.x = x;
+		this.y = y;
+		this.color = null;
+		this.status = false;
+		this.html = html;
+	}
+	
+	var G = function()
+	{
+		this.grids = [];
+		this.nextGrids = [];
+		this.color = ['#9F0','#FF3','#F33','#C0C','#33C','#0F3','#F93'];
+		this.w = 12;
+		this.h = 20;
+		this.x;
+		this.y;
+		this.score = 0;
+		this.level;
+		this.start = false;
+		this.gameOver = false;
+		this.oRegex = /^\s*|\s*$/g
+		this.model = 
+		[
+			[
+				["  ","  ","  ","  "],
+				["■","■","■","■"],
+				["  ","  ","  ","  "],           
+				["  ","  ","  ","  "]            
+			],
+			[            
+				["■","■","■"],
+				["  ","■","  "],
+				["  ","  ","  "]            
+			],
+			[
+				["■","■"],
+				["■","■"]
+			],
+			[            
+				["■","■","  "],
+				["  ","■","■"],
+				["  ","  ","  "]            
+			],                          
+			[           
+				["■","■","■"],
+				["  ","  ","■"],
+				["  ","  ","  "]            
+			],
+			[      
+				["■","  ","  "],                   
+				["■","■","■"],
+				["  ","  ","■"]          
+			],            
+			[           
+				["■","■","■"],
+				["■","  ","■"],
+				["  ","  ","  "]            
+			],            
+			[           
+				["  ","  ","  "], 
+				["■","■","■"],
+				["  ","  ","  "]           
+			],
+			[           
+				["■","■"],
+				["  ","  "]           
+			], 
+			[           
+				["■"]           
+			],
+			[    
+				["  ","■","  "],                      
+				["■","■","■"],
+				["  ","■","  "]          
+			]                                      
+		]
+	}
+	
+	G.prototype.rand = function()
+	{
+		var g = parseInt(Math.random() * this.model.length);
+		var c = parseInt(Math.random() * this.color.length);
+		this.currentModel = this._nextModel ? this._nextModel : [];
+		this.currentColor = this._nextColor ? this._nextColor : null;
+		this.currentGrid = [];
+	   
+		for(var i = 0 ; i < this.currentModel.length ; i ++)
+		{
+			for(var j = 0 ; j < this.currentModel[i].length ; j ++)
+			{
+				if(this.currentModel[i][j].replace(this.oRegex,"").length == 0) continue;
+				this.grids[i][j].status = true;
+				this.grids[i][j].color = this.currentColor;
+				this.currentGrid.unshift(this.grids[i][j]);
+			}
+		}
+		
+		this._nextModel = this.model[g];
+		this._nextColor = this.color[c];
+
+		for(var i = 0 ; i < this.nextGrids.length; i ++)
+		{
+			for(var j = 0 ; j < this.nextGrids[i].length ; j ++)
+			{
+					this.nextGrids[i][j].status = false;
+					this.nextGrids[i][j].color = null;
+			}
+		}
+
+		for(var i = 0 ; i < this._nextModel.length ; i ++)
+		{
+			for(var j = 0 ; j <this._nextModel.length ; j ++)
+			{
+				if(this._nextModel[i][j].replace(this.oRegex,"").length != 0)
+				{
+	
+					this.nextGrids[i][j].status = true;
+					this.nextGrids[i][j].color = this._nextColor;
+				}
+			}
+		}
+	}
+	
+	G.prototype.hasAround = function(direction)
+	{
+		var hasGrid = false;
+		
+		for(var i = 0 ; i < this.currentGrid.length ; i ++)
+		{
+			  var grid = this.currentGrid[i];
+			  var x = grid.x;
+			  var y = grid.y;
+			  var nextGrid = null;
+			  switch(direction)
+			  {
+				  case "left":
+					  nextGrid  = this.getGrid(grid.x-1,grid.y);
+					  break;
+				  case "right":
+					  nextGrid = this.getGrid(grid.x+1,grid.y);
+					  break;
+				  case "bottom":
+					  nextGrid = this.getGrid(grid.x,grid.y+1);
+					  break;
+			  }
+			  
+			  hasGrid = nextGrid == null || nextGrid.status ? true : false;
+			  for(var j = 0 ; j < this.currentGrid.length ; j ++)
+			  {
+				  if(this.currentGrid[j] == nextGrid)
+				  {
+					  hasGrid = false;
+					  break;
+				  }
+			  }
+			  if(hasGrid) break;
+		}
+		return hasGrid;
+	}
+	
+	G.prototype.next = function()
+	{
+	
+		for(var i = 0 ; i < this.grids.length ; i ++)
+		{
+			var isClear = false;
+			for(var j = 0 ; j < this.grids[i].length ; j ++)
+			{
+				if(!this.grids[i][j].status)
+				{
+					isClear = false;
+					break;
+				}
+				isClear = true;
+			}
+			
+			if(!isClear) continue;
+			
+			for(var k = i ; k >= 0 ; k --)
+			{
+				for(var f = 0 ; f < this.grids[k].length ; f ++)
+				{
+					var prevGrid = k > 0 ? this.grids[k-1][f] : {color:null,status:false};
+					this.grids[k][f].color = prevGrid.color;
+					this.grids[k][f].status = prevGrid.status;
+				}
+			}
+			this.score ++;
+		}
+		
+		if(parseInt(this.score/5) != this.level)
+		{
+			this.level = this.level != undefined ? ++this.level : 0;
+			window.clearInterval(this.auto);
+			this.auto = window.setInterval(function(){var bind = this; return function(){bind.timetesk()}}.call(this),750/((this.level + 1)*0.75))
+		}
+		
+		this.domScore.innerHTML = "消除:" + this.score;
+		this.domLevel.innerHTML = "级别:" + this.level; 
+		this.x = 1;
+		this.y = 1;
+
+		if(this.isGameOver())
+		{
+			this.writeError();
+			this.gameOver = true;
+			window.clearInterval(this.auto);
+			return false;
+		}
+		
+		this.rand();
+		this.move(5,0,0);
+	}
+	
+	G.prototype.writeError = function()
+	{
+		var message = "";
+		switch(this.level)
+		{
+			case 0:
+				 message+="您的反应能力属于婴儿级别的！";
+				 break
+			case 1:
+				 message+="您的反应能力属于3岁小孩级别的！";
+				 break;
+			case 2:
+				 message+="您的反应能力属于小学生级别的！";
+				 break;
+			case 3:
+				 message+="您的反应能力快合格了！";
+				 break;
+			case 4:
+				 message+="您的反应能力刚刚合格！";
+				 break;
+			case 5:
+				 message+="您的反应能力超快！";
+				 break;
+			default:
+				 message+="您是个天才！拯救地球的伟大任务就交给你了。";
+				 break;
+		}
+		message+="\n此评测结果来自：中国科学院人类大脑开发中心";
+		alert(message);	
+	}
+	
+	G.prototype.isGameOver = function()
+	{
+		var isGameOver = false;
+		var firstRow = this.grids[0];
+		for(var i = 0 ; i < firstRow.length; i ++)
+		{
+			if(!firstRow[i].status) continue;
+			isGameOver = true;
+			break;
+		}
+		return isGameOver;
+	}
+	
+	G.prototype.move = function(x,y,t)
+	{               
+		if(this.gameOver) return false;
+		if(t==1&&x==0&&y==0)
+		{ 
+			this.transfer();
+			return;
+		}
+
+		var isbottom = this.hasAround("bottom");
+		var isleft = this.hasAround("left");
+		var isright = this.hasAround("right");
+		if(isbottom && x == 0)
+		{
+			this.next();
+			return false;
+		}
+		
+		if(x<0 && isleft)
+		{
+			return false;
+		}
+		
+		if(x>0 && isright) return false;
+		
+		this.x += x;
+		this.y += y;
+		var i = 0 ;
+		while(i<this.currentGrid.length)
+		{
+			 var index = x < 0 ? this.currentGrid.length - i-1 : i ; //x小于0,反向遍历数组
+			 var oldGrid = this.currentGrid[index];
+			 var color = oldGrid.color;
+			 var status = oldGrid.status;
+			 var newGrid = this.getGrid(oldGrid.x+x,oldGrid.y+y);
+			 if(newGrid.status)
+			 { 
+				 this.writeError();
+				 this.gameOver = true;
+				 window.clearInterval(this.auto);
+				 return false;
+			 }
+			 newGrid.color = color;
+			 newGrid.status =status;
+			 oldGrid.color=null;
+			 oldGrid.status = false;
+			 this.currentGrid[index] = newGrid;    
+			 i ++;           
+		}
+		this.draw();
+		return true;
+	}
+	
+	G.prototype.transfer = function()
+	{
+		 var rowCount = this.currentModel.length;
+		 var model = new Array();//临时数组
+		 for(var k = 0 ; k < rowCount ; k ++)
+		 {
+			 model[k] = new Array();
+		 }
+		 
+		 for(var i = rowCount ; i > 0; i --)
+		 {          
+			 var colCount = this.currentModel[i - 1].length;
+			 
+			 for(var j = colCount ; j > 0; j --)
+			 {
+				  var e = this.currentModel[i - 1][j - 1];
+				  model[colCount - j][i - 1]= e
+			 }
+		 }
+		 
+		 
+		 var count = 0;
+		 var targetCount = 0;
+		 for(var i = 0 ; i < model.length ; i ++)
+		 {
+			 for(var j = 0 ;j < model[i].length ; j ++)
+			 {
+				  if(model[i][j].replace(this.oRegex,"").length != 0) count ++;
+				  var grid = this.getGrid(j+this.x,i+this.y)
+				  if(grid == null || grid.status) targetCount ++;
+			 }
+		 }
+		 
+		 if(count != targetCount) return false;
+
+		 var tmpColor = null;
+		 
+		 for(var i = 0 ; i < this.currentModel.length ; i ++)
+		 {
+			 for(var j = 0 ; j < this.currentModel[i].length ; j ++)
+			 {
+				 if(this.currentModel[i][j].replace(this.oRegex,"").length == 0) continue
+				 var grid = this.getGrid(j+this.x,i+this.y);
+				 tmpColor = grid.color;
+				 grid.status = false;
+				 grid.color = null   
+			 }
+		 }
+		 
+		 
+		 this.currentModel = model;
+		 
+		 this.currentGrid = [];
+		 for(var i = 0 ; i < this.currentModel.length ; i ++)
+		 {
+			for(var j = 0 ; j < this.currentModel[i].length ; j ++)
+			{
+				if(this.currentModel[i][j].replace(this.oRegex,"").length == 0) continue;
+				var grid = this.getGrid(j + this.x,i + this.y);
+				grid.status = true;
+				grid.color = tmpColor;
+				this.currentGrid.unshift(grid);
+			}
+		 }       
+		 this.draw();
+	}
+	
+	G.prototype.getGrid = function(x,y)
+	{
+		for(var i = 0 ; i < this.grids.length ; i ++)
+		{
+			for(var j = 0 ; j < this.grids[i].length ; j ++)
+			{
+				var grid = this.grids[i][j];
+				if(grid.x == x && grid.y == y )  return grid;  
+			}
+		}
+		return null;
+	}
+	
+	G.prototype.timetesk = function()
+	{
+		if(!this.start) return false;
+		return this.move(0,1);
+	}
+	
+	G.prototype.draw = function()
+	{
+		for(var i = 0 ; i < this.grids.length ; i ++)
+		{
+			 for(var j = 0 ; j < this.grids[i].length ; j ++)
+			 {
+				 var grid = this.grids[i][j];
+				 if(grid.status)
+				 {
+					 grid.html.style.visibility =''; 
+					 grid.html.style.background = grid.html.style.borderColor = grid.color;
+				 }
+				 else
+				 {
+					 grid.html.style.visibility = 'hidden'
+				 }
+			 }             
+		}
+		
+		for(var i = 0 ; i < this.nextGrids.length ; i ++)
+		{
+			 for(var j = 0 ; j < this.nextGrids[i].length ; j ++)
+			 {
+				 var grid = this.nextGrids[i][j];
+				 if(grid.status)
+				 {
+					 grid.html.style.visibility =''; 
+					 grid.html.style.background = grid.html.style.borderColor = grid.color;
+				 }
+				 else
+				 {
+					 grid.html.style.visibility = 'hidden'
+				 }
+			 }             
+		}        
+	}
+	
+	G.prototype.event = function(oG)
+	{
+		this.onkeydown = function(e)
+		{
+			e = e || window.event ; 
+			switch(e.keyCode)
+			{
+				case 37:
+					oG.move(-1,0)
+				break;
+				case 39:
+					oG.move(1,0)
+				break;
+				case 38:
+					oG.move(0,0,1)
+				break;
+				case 40:
+					oG.timetesk();        
+				break;
+				case 32:
+					while(oG.timetesk());
+				break;
+			}
+		}
+	}
+	
+	G.prototype.init = function()
+	{ 
+		var body = document.getElementById('body');
+		var next = document.getElementById("next");
+		for(var i = 0 ; i < this.h ; i ++)
+		{
+			var row = [];
+			for(var j = 0 ; j < this.w; j ++)
+			{
+				var html = document.createElement("span");
+				body.appendChild(html);
+				var grid = new Grid(j+1,i+1,html);
+				row.push(grid);
+			}
+			this.grids.push(row);
+		}
+		
+		for(var i = 0 ; i < 4 ; i ++)
+		{
+			var row = [];
+			for(var j = 0 ; j < 4 ; j ++)
+			{
+				var html = document.createElement("p");
+				next.appendChild(html);
+				var grid = new Grid(j+1,i+1,html);
+				row.push(grid);
+			}
+			this.nextGrids.push(row);
+		}
+			   
+		this.domScore = document.getElementById("score");
+		this.domLevel = document.getElementById("level");
+		this.rand();
+		this.next();
+		this.event.call(document,this);
+	}
+	var g = new G();
+    </script>
+</head>
+<body onload="javascript:g.init()">
+    <div id='main'>
+        <div id='body'></div>
+        <div id='score'></div>
+        <div id='level'></div>
+        <div id='next'></div>
+        <div id='ctrl'>
+            <button onkeydown="return false" onkeypress="return false" onkeyup="return false" onclick="javascript:this.innerHTML = {'true':'暂停','false':'点击开始'}[g.start=!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!g.start]">点击开始</button>        
+            <button onclick="javascript:location.href=location.href;">新游戏</button>
+        </div>
+    </div>
+</body>
+</html>
+
+        

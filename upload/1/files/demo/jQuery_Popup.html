@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title></title>
+<script type='text/javascript' src='http://code.jquery.com/jquery-1.7.2.js'></script>
+<script type='text/javascript' src='http://code.usuishi.com/scripts/common.js'></script>
+<style type='text/css'>
+body, div, h3{ margin:0;padding:0;}
+.pop{ z-index:1; background:#fff;border:5px solid #555}
+    .pop h3{background: #629CFD; font-size:14px; color:#fff; width:100%; height:28px;line-height:28px;}
+	   .pop h3 span{ float:left; display:inline-block; padding-left:10px;}
+       .pop h3 img{ cursor:pointer; float:right; padding-top:5px; padding-right:8px}
+.mask{background:#000; z-index:0;}
+.move{ cursor:move;}
+</style>
+</head>
+<body>
+<body>
+
+<script type="text/javascript">
+
+function Popup(opt)
+{
+	this.loaded = [];
+    this.opened = [];
+    this.closed = [];	
+	
+	var content ;
+	var popElement ; 
+	var mask ;
+	var owner = this;
+	var moveCount = 30;
+    	
+	var createPopElement = function()
+	{
+		var popCssText=  "width:"+ opt.width +"px; height:"+ opt.height +"px;position:absolute;"
+		popCssText +="display:none";
+		
+	    var html = "<div class='pop' style='"+ popCssText +"'>"+
+		              "<h3><span>"+ opt.title +"</span> <img src='http://code.usuishi.com/images/close_tip.png' /> </h3>"+
+					  "<div class='content'>"+
+					      content.getContent(this)+
+					  "</div>"
+		           "</div>"
+	    return $(html);
+	}
+	
+	var createMask = function()
+	{
+		var maskHtml = "<div style='display:none;position:absolute;left:0;top:0' class='mask'></div>";
+		var maskElement = $(maskHtml);
+		maskElement.css('opacity','0.1');
+		return maskElement;
+	}
+	
+	var setShowInfo = function()
+	{
+	    var popLeft = ($(window).width() - opt.width) / 2
+		var popTop = getTop()- moveCount; 
+	    var maskWidth = $(window).width();
+		var maskHeight = $(document).height();		
+		popElement.css({'left':popLeft,'top':popTop,'opacity':0});
+		mask.css({'width':maskWidth,'height':maskHeight});
+	}
+	
+	var getTop = function()
+	{
+	    var popTop = ($(window).height() - opt.height)/ 2 + $(document).scrollTop();	
+		return popTop;
+	}
+	
+	var onLoad = function()
+	{
+	    $.each(owner.loaded,function(){this(owner)});
+	}
+	
+	var onOpen = function()
+	{
+	    $.each(owner.opened,function(){this(owner)});
+	}
+	
+	var onClose = function()
+	{
+	    $.each(owner.closed,function(){this(owner)});
+	}
+	
+	this.initialize = function()
+	{
+	    popElement = createPopElement();
+		mask = createMask();
+		$("body").append(mask);
+		$("body").append(popElement);
+		addEvent();
+		onLoad();		
+	}
+	
+	this.open = function()
+	{
+	    setShowInfo();
+		popElement.show().animate({'top':getTop(),'opacity':1},400)
+		mask.show();
+		onOpen();
+	}
+	
+	this.close = function()
+	{
+	    popElement.animate({'top':parseFloat(popElement.css('top')) - moveCount,'opacity':0},400,function(){
+		    $(this).hide();
+		})
+		mask.hide();
+		onClose();
+	}
+	
+	this.dispose = function()
+	{
+	    popElement.remove();
+		mask.remove();
+	}
+	
+    this.setContent = function(con)
+	{
+	    content = con;
+	}
+	
+	this.getElement = function()
+	{
+	    return popElement;
+	}
+	
+	var addEvent = function()
+	{
+	    if(opt.isDrag) 
+		{
+	        var drag = new PopupDrag(owner);
+		    drag.bind();		   
+		}
+		popElement.children('h3').children('img').bind('click',function(){owner.close()});
+	}
+}
+
+var PopupDrag = function(pop)
+{
+    var element = pop.getElement();
+    var title = element.children('h3');
+	var elementX,elementY, pointX, pointY;
+	
+	var mouseDown = function(e)
+	{
+	     title.addClass('move');
+	     $(document).bind('mousemove',mouseMove);
+         $(document).bind('mouseup',mouseUp)		 
+	     elementX = parseFloat(element.css('left'));
+         elementY = parseFloat(element.css('top'));
+         pointX = e.pageX;
+         pointY = e.pageY;		 
+		 e.stopPropagation();
+		 e.preventDefault();
+	}
+	
+	var mouseMove = function(e)
+	{
+	    element.css('left',elementX + e.pageX - pointX);
+	    element.css('top',elementY + e.pageY - pointY);
+		e.stopPropagation();
+		e.preventDefault();
+	}
+	
+	var mouseUp = function(e)
+	{
+	    title.removeClass('move');
+	    $(document).unbind('mousemove',mouseMove);
+		$(document).unbind('mouseup',mouseUp);
+		e.stopPropagation();
+		e.preventDefault();		
+	}
+	
+	this.bind = function()
+	{
+	   title.bind('mousedown',mouseDown);
+	}
+}
+
+
+var content = {};
+content.getContent = function(pop)
+{
+    return "这个里面放内容的";
+}
+
+var pop = new Popup({width:500,height:250,title:'自定义标题',isDrag:true});
+pop.setContent(content)
+pop.initialize();
+
+</script>
+
+<input type='button' onclick='pop.open()' value='open' />
+<input type='button' onclick='pop.dispose()' value='dispose'/>
+</body>
+</body>
+</html>

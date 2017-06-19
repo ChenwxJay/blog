@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>无标题页</title>
+</head>
+<body>
+
+<textarea id='content'>
+
+</textarea>
+<input type='button' onclick=''/>
+<script type='text/javascript'>
+
+function addEvent(l, i, I) {
+    if (l.attachEvent) {
+        l.attachEvent("on" + i, I)
+    } else {
+        l.addEventListener(i, I, false)
+    }
+}
+
+function delEvent(l, i, I) {
+    if (l.detachEvent) {
+        l.detachEvent("on" + i, I)
+    } else {
+        l.removeEventListener(i, I, false)
+    }
+}
+
+function elementFactory(html)
+{
+    var tempParent = document.createElement('div');
+	tempParent.innerHTML = html;
+	return tempParent.childNodes[0];
+}
+
+var EditorContent = function(textareaid,width,height)
+{
+    var editor = document.getElementById(textareaid);
+	
+	var initialize = function()
+	{
+	    editor.style.width = width+'px';
+		editor.style.height = height + 'px';
+	}
+	
+	this.getEditor = function()
+	{
+	    return editor;
+	}
+	
+	this.getText = function()
+	{
+	    return editor.value;
+	}
+	
+	this.setText = function(value)
+	{
+	    editor.value = value;
+	}
+	
+	this.appendText = function(value)
+	{
+	    editor.value += value;
+	}
+	
+	this.getSelectText = function()
+	{
+		editor.focus();
+		if (this.range)
+			return this.range.text;
+		else if (editor.document && editor.document.selection)
+			return editor.document.selection.createRange().text;
+		else if (typeof editor.selectionStart != "undefined")
+			return editor.value.substring(editor.selectionStart, editor.selectionEnd);	
+	}
+	
+	this.setSelectText = function(value)
+	{
+		editor.focus();
+		if (this.range) {
+			this.range.text = value;
+			this.range.select();
+			this.range = null;
+		} else if (editor.document && editor.document.selection)
+			editor.document.selection.createRange().text = value;
+		else if (typeof editor.selectionStart != "undefined") {
+			var str = editor.value;
+			var start = editor.selectionStart;
+			var top = editor.scrollTop;
+			editor.value = str.substr(0, start) + value +
+ 			    str.substring(editor.selectionEnd, str.length);
+			editor.selectionStart = start + value.length;
+			editor.selectionEnd = start + value.length;
+			editor.scrollTop = top;
+		}	
+	}
+	
+	initialize();
+}
+
+
+var EditorMenu = function()
+{
+     var menu = document.createElement('div');
+	 
+	 this.addSeparator = function()
+	 {
+	     var separator = document.createElement('a');
+         separator.innerHTML = '|';
+         menu.appendChild(separator);
+         return separator;		 
+	 }
+	 
+	 this.deleteSeparator = function(separator)
+	 {
+	     separator.parentNode.removeChild(separator);
+	 }
+	 
+	 this.addButton = function(actionButton)
+	 {
+	     menu.appendChild(actionButton.getIcon());
+	 }
+	 
+	 this.removeButton = function(actionButton)
+	 {
+	     menu.removeChild(actionButton.getIcon());
+	 }
+	 
+	 this.getMenu = function()
+	 {
+	     return menu;
+	 }
+}
+
+
+
+var DropDownDialog = function(left , top)
+{
+    var dialog ;
+	
+    var createDialog = function()
+	{
+	    var dialog = document.createElement('div');
+		dialog.style.position='absolute';
+		dialog.style.left = left + 'px';
+		dialog.style.top = top + 'px';
+		return dialog;
+	}
+	
+    var getDialog = function()
+	{
+	    if(!dialog) dialog = createDialog();
+		return dialog;
+	}
+	
+	this.setContent = function(element)
+	{
+	     var dialog = getDialog();
+		 dialog.appendChild(element);
+	}
+	
+	this.showDialog = function()
+	{
+	    document.body.appendChild(getDialog());
+	}
+	
+	this.removeDialog = function()
+	{
+	    document.body.removeChild(getDialog());
+	}
+}
+
+
+var ActionButton = function(editor)
+{
+    var icon ;
+	
+    this.getIconPath = function()
+	{
+	    return "";
+	}
+	
+	this.createIcon = function()
+	{
+	    var icon = document.createElement('img');
+		icon.src = this.getIconPath();
+		return icon;
+	}
+	
+	this.getIcon = function()
+	{
+	    if(!icon) icon = this.createIcon();
+		return icon;
+	}
+}
+
+var FontSize = function(editor)
+{
+    ActionButton.call(this,editor);
+
+	var self = this;
+	
+	this.getIconPath = function()
+	{
+	     return 'http://www.chhblog.com/tiny_mce/plugins/filemanager/insertimage.gif';
+	}
+	
+	var getFontSetter = function()
+	{
+	    var html = '<div>'
+		html += '<ul>'
+		html += '<li size="1">一号</li>';
+		html += '<li size="2">二号</li>';
+		html += '<li size="3">三号</li>';
+		html += '<li size="4">四号</li>';
+		html += '<li size="5">五号</li>';
+		html += '<li size="4">六号</li>';
+		html += '</ul>';
+		html += '</div>'
+		return elementFactory(html);
+	}
+	
+	
+	
+	var showFontDialog = function()
+	{
+	    
+	}
+	
+	var initialize = function()
+	{
+	    var icon = self.getIcon();
+	    addEvent(icon,'click',showFontDialog);
+	}
+	
+	initialize();
+}
+
+
+var editor = new EditorContent('content',300,100);
+
+var fontSize = new FontSize(editor);
+var menu = new EditorMenu();
+menu.addSeparator();
+menu.addButton(fontSize);
+menu.addSeparator();
+
+var parent = editor.getEditor().parentNode;
+parent.insertBefore(menu.getMenu(),editor.getEditor());
+
+</script>
+
+
+</body>
+</html>
+</html>
