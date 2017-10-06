@@ -4,6 +4,7 @@ import (
 	"./web"
 	"./admin"
 	"net/http"
+	"./admin/ueditor"
 )
 
 
@@ -21,6 +22,11 @@ func main() {
 	http.Handle("/admin/login", new(admin.Login));
 	http.HandleFunc("/admin/article_list", admin.ArticleList)
 	http.HandleFunc("/admin/article_add", admin.ArticleAdd)
+
+	//UEditor上传图片
+	http.HandleFunc("/ueditor/go/controller", ueditor.Controller)
+	http.Handle("/static/", http.FileServer(http.Dir(".")))
+
 	http.ListenAndServe(":9529", nil);
 }
 

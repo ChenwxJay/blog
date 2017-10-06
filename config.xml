@@ -1,3 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Configs>
+	<ConnectingString>aspwebchh:82257649@tcp(chhblog.com:3306)/chhblog?charset=utf8</ConnectingString>
 </Configs>
