@@ -4,10 +4,16 @@ import (
 	"../common"
 	"../db_helper"
 	"strconv"
+	"fmt"
 )
 
 type Article struct {
 
+}
+
+func (self *Article) AddArticle(title string, author string, content string)  {
+	var sql = "insert into article (title, author, content, show_time, add_time, read_count, is_commend ) values (?,?,?,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP(),0,0)";
+	DbHelper.GetDataBase().ExecuteSql(sql,title,author,content);
 }
 
 func (self *Article) GetArticle( id int) (map[string]string)  {
@@ -39,7 +45,7 @@ func (self *Article) GetArticleList( start int, end int, cateId int, kw string) 
 	}
 	countSql := "select count(1) from article where " + where ;
 	sql := "select id , title from article where "+ where +" order by id desc limit " + limit;
-
+	fmt.Println(sql)
 	dataCount,_:= strconv.Atoi( DbHelper.GetDataBase().GetSingle(countSql,args...) );
 	dataList := DbHelper.GetDataBase().Query(sql,args...);
 	return dataList,dataCount;

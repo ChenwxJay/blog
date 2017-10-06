@@ -20,6 +20,7 @@ func main() {
 	//后端
 	http.Handle("/admin/login", new(admin.Login));
 	http.HandleFunc("/admin/article_list", admin.ArticleList)
+	http.HandleFunc("/admin/article_add", admin.ArticleAdd)
 	http.ListenAndServe(":9529", nil);
 }
 

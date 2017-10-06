@@ -40,8 +40,8 @@ type Pager struct {
 }
 
 func (self *Pager) GetRange()( int , int )  {
-	var start = self.PageSize * ( self.PageIndex - 1 ) + 1;
-	var end = start + self.PageSize - 1;
+	var start = self.PageSize * ( self.PageIndex - 1 );
+	var end = start + self.PageSize ;
 	return start, end;
 }
 

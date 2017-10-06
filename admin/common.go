@@ -1,6 +1,9 @@
 package admin
 
 import "encoding/json"
+import "../model"
+
+var articleModel = model.Article{};
 
 type ResponseData struct {
 	Code int
