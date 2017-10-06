@@ -96,7 +96,9 @@
                             <td>${item.title}</td>
                             <td>${item.author}</td>
                             <td class="center">${item.add_time}</td>
-                            <td class="center"></td>
+                            <td class="center">
+                                <a href="javascript:;" onclick="del(${item.id})">删除</a>
+                            </td>
                         </tr>`;
             }
             $("#data_list").html( html );
@@ -106,6 +108,28 @@
     }
 
     load();
+
+    function del(id) {
+        parent.layer.confirm('确定要删除此项吗？', {
+            btn: ['确定', '取消'],
+            shade: false
+        }, function () {
+            let ajaxSetting = {};
+            ajaxSetting.url = "/admin/article_del?id=" + id;
+            ajaxSetting.type = 'GET';
+            ajaxSetting.dataType = 'JSON';
+            ajaxSetting.success = function (response) {
+                parent.layer.msg(response.Message, {time: 1000},()=>{
+                    if (response.Code == 0) {
+                        window.location.href = "_article_list.html";
+                    }
+                });
+            }
+            $.ajax(ajaxSetting);
+//            Common.ajax( ajaxSetting );
+        });
+
+    }
 </script>
 
 </body>

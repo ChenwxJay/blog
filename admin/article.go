@@ -3,6 +3,7 @@ package admin
 import (
 	"net/http"
 	"encoding/json"
+	"strconv"
 )
 
 func ArticleList(response http.ResponseWriter, request *http.Request) {
@@ -18,3 +19,11 @@ func ArticleAdd(response http.ResponseWriter, request *http.Request)   {
 	articleModel.AddArticle(title,author,content)
 	response.Write(JsonData(0,"添加成功",nil))
 }
+
+func ArticleDel(response http.ResponseWriter, request *http.Request)   {
+	var id = request.FormValue("id")
+	var intId ,_ = strconv.Atoi(id)
+	articleModel.DelArticle(intId)
+	response.Write(JsonData(0,"删除成功",nil))
+}
+

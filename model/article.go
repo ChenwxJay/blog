@@ -16,6 +16,11 @@ func (self *Article) AddArticle(title string, author string, content string)  {
 	DbHelper.GetDataBase().ExecuteSql(sql,title,author,content);
 }
 
+func (self *Article) DelArticle( id int)  {
+	var sql = "delete from article where id = ?"
+	DbHelper.GetDataBase().ExecuteSql(sql,id)
+}
+
 func (self *Article) GetArticle( id int) (map[string]string)  {
 	sql := "select * from article where id = " + strconv.Itoa(id);
 	result := DbHelper.GetDataBase().Query(sql);
