@@ -33,3 +33,15 @@ func ArticleCates(response http.ResponseWriter, request *http.Request)   {
 	var json,_ = json.Marshal(cates)
 	response.Write(json)
 }
+
+
+func ArticleView(response http.ResponseWriter, request *http.Request)   {
+	var id,err = strconv.Atoi( request.FormValue("id") )
+	if( err != nil ) {
+		return
+	}
+	var articleInfo = articleModel.GetArticle(id)
+	var json,_ = json.Marshal(articleInfo)
+	response.Write(json)
+}
+

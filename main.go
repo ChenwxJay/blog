@@ -24,6 +24,7 @@ func main() {
 	http.HandleFunc("/admin/article_add", admin.ArticleAdd)
 	http.HandleFunc("/admin/article_del", admin.ArticleDel)
 	http.HandleFunc("/admin/article_cates", admin.ArticleCates)
+	http.HandleFunc("/admin/article_view", admin.ArticleView)
 
 	//UEditor上传图片
 	http.HandleFunc("/ueditor/go/controller", ueditor.Controller)
