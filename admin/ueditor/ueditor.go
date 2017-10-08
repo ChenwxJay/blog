@@ -14,7 +14,7 @@ import (
 
 func Controller(w http.ResponseWriter, r *http.Request) {
 	action := r.URL.Query()["action"][0]
-	fmt.Println(r.Method, action)
+	//fmt.Println(r.Method, action)
 	if r.Method == "GET" {
 		if action == "config" {
 			config(w, r)
@@ -65,6 +65,6 @@ func uploadImage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(b))
+	//fmt.Println(string(b))
 	w.Write(b)
 }
