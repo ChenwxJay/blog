@@ -14,9 +14,10 @@ func ArticleList(response http.ResponseWriter, request *http.Request) {
 
 func ArticleAdd(response http.ResponseWriter, request *http.Request)   {
 	var title = request.FormValue("title")
+	var cate = request.FormValue("cate");
 	var author = request.FormValue("author")
 	var content = request.FormValue("content")
-	articleModel.AddArticle(title,author,content)
+	articleModel.AddArticle(title,cate,author,content)
 	response.Write(JsonData(0,"添加成功",nil))
 }
 
@@ -27,3 +28,8 @@ func ArticleDel(response http.ResponseWriter, request *http.Request)   {
 	response.Write(JsonData(0,"删除成功",nil))
 }
 
+func ArticleCates(response http.ResponseWriter, request *http.Request)   {
+	var cates = articleModel.GetCates()
+	var json,_ = json.Marshal(cates)
+	response.Write(json)
+}

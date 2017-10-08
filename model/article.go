@@ -11,9 +11,14 @@ type Article struct {
 
 }
 
-func (self *Article) AddArticle(title string, author string, content string)  {
+func (self *Article) AddArticle(title string, cate string, author string, content string)  {
 	var sql = "insert into article (title, author, content, show_time, add_time, read_count, is_commend ) values (?,?,?,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP(),0,0)";
 	DbHelper.GetDataBase().ExecuteSql(sql,title,author,content);
+	var identitySql = "select @@identity"
+	var articleId = DbHelper.GetDataBase().GetSingle(identitySql)
+
+	var addCateSql = "insert into article_categories(article_id,cate_id) values ("+ articleId +","+ cate +")"
+	DbHelper.GetDataBase().ExecuteSql(addCateSql)
 }
 
 func (self *Article) DelArticle( id int)  {
