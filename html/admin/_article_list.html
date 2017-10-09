@@ -81,6 +81,8 @@
 <script src="js/plugins/dataTables/jquery.dataTables.js"></script>
 <script src="js/plugins/dataTables/dataTables.bootstrap.js"></script>
 <script src="js/content.min.js?v=1.0.0"></script>
+<script src="/html/script/common.js"></script>
+
 <script>
     function load() {
         let ajaxSetting = {};
@@ -93,7 +95,7 @@
                 let item = response[i];
                 html += `<tr class="gradeA">
                             <td>${item.id}</td>
-                            <td>${item.title}</td>
+                            <td onclick="window.open('/article_view?id=${item.id}');" style="cursor: pointer">${item.title}</td>
                             <td>${item.author}</td>
                             <td class="center">${item.add_time}</td>
                             <td class="center">
@@ -103,7 +105,7 @@
                         </tr>`;
             }
             $("#data_list").html( html );
-            $(".dataTables-example").dataTable({"bSort": false});
+            $(".dataTables-example").dataTable({"bSort": false,aLengthMenu: [ 20, 50]});
         }
         $.ajax( ajaxSetting );
     }
@@ -128,7 +130,6 @@
             }
             $.ajax(ajaxSetting);
         });
-
     }
 </script>
 

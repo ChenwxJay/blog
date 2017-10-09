@@ -49,4 +49,17 @@ namespace chhblog{
     export function isInteger( val : string ) {
         return /^\d+$/.test( val );
     }
+
+    export function checkLogin() {
+        if( window.location.href.indexOf("\/html\/admin\/") != -1 ) {
+            $.get("/admin/check_login", function( response ){
+                let data = eval("("+ response +")");
+                if( data.Code == 1 ) {
+                    window.top.location.href = "/";
+                }
+            });
+        }
+    }
 }
+
+chhblog.checkLogin();

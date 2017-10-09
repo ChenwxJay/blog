@@ -19,7 +19,8 @@ func main() {
 	http.Handle("/article_view", new(web.ArticleView));
 
 	//后端
-	http.Handle("/admin/login", new(admin.Login));
+	http.HandleFunc("/admin/login", admin.Login );
+	http.HandleFunc("/admin/check_login", admin.CheckLogin )
 	http.HandleFunc("/admin/article_list", admin.ArticleList)
 	http.HandleFunc("/admin/article_add", admin.ArticleAdd)
 	http.HandleFunc("/admin/article_del", admin.ArticleDel)

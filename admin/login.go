@@ -2,17 +2,12 @@ package admin
 
 import (
 	"net/http"
-	"../model"
 )
 
-type Login struct{
-	http.Handler
-}
 
-func ( self * Login ) ServeHTTP( response http.ResponseWriter, request *http.Request ) {
+func Login( response http.ResponseWriter, request *http.Request ) {
 	userName := request.FormValue("user_name");
 	password := request.FormValue("password");
-	loginModel := new (model.Login);
 	success := loginModel.CallLogin( userName, password, response );
 	var result []byte;
 	if success {
@@ -22,3 +17,15 @@ func ( self * Login ) ServeHTTP( response http.ResponseWriter, request *http.Req
 	}
 	response.Write(result);
 }
+
+func CheckLogin( response http.ResponseWriter, request *http.Request ) {
+	var isLogin = loginModel.IsLogin( request )
+	var result  []byte = nil
+	if isLogin {
+		result = JsonData( 0, "登录中", nil );
+	} else {
+		result = JsonData( 1,"登录失效", nil );
+	}
+	response.Write(result);
+}
+

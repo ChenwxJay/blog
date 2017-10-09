@@ -29,7 +29,7 @@ func (self *Login) IsLogin( request *http.Request  ) bool {
 	if e1 != nil || e2 != nil || e3 != nil {
 		return  false
 	}
-	userKey := self.createUserKey( userIdCookie.Value, userNameCookie.Value)
+	userKey := self.createUserKey( userIdCookie.Value, userNameCookie.Value )
 	return userKeyCookie.Value == userKey
 }
 

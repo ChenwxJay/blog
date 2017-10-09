@@ -12,7 +12,11 @@ func ArticleList(response http.ResponseWriter, request *http.Request) {
 	response.Write(json);
 }
 
-func ArticleAdd(response http.ResponseWriter, request *http.Request)   {
+func ArticleAdd(response http.ResponseWriter, request *http.Request) {
+	if( !loginModel.IsLogin(request)) {
+		response.Write(LoginErrorResponse());
+		return
+	}
 	var title = request.FormValue("title")
 	var cate = request.FormValue("cate");
 	var author = request.FormValue("author")
@@ -22,7 +26,11 @@ func ArticleAdd(response http.ResponseWriter, request *http.Request)   {
 }
 
 
-func ArticleEdit(response http.ResponseWriter, request *http.Request)   {
+func ArticleEdit(response http.ResponseWriter, request *http.Request) {
+	if( !loginModel.IsLogin(request)) {
+		response.Write(LoginErrorResponse());
+		return
+	}
 	var title = request.FormValue("title")
 	var cate = request.FormValue("cate");
 	var author = request.FormValue("author")
@@ -32,7 +40,11 @@ func ArticleEdit(response http.ResponseWriter, request *http.Request)   {
 	response.Write(JsonData(0,"编辑成功",nil))
 }
 
-func ArticleDel(response http.ResponseWriter, request *http.Request)   {
+func ArticleDel(response http.ResponseWriter, request *http.Request) {
+	if( !loginModel.IsLogin(request)) {
+		response.Write(LoginErrorResponse());
+		return
+	}
 	var id = request.FormValue("id")
 	var intId ,_ = strconv.Atoi(id)
 	articleModel.DelArticle(intId)
@@ -45,7 +57,6 @@ func ArticleCates(response http.ResponseWriter, request *http.Request)   {
 	response.Write(json)
 }
 
-
 func ArticleView(response http.ResponseWriter, request *http.Request)   {
 	var id,err = strconv.Atoi( request.FormValue("id") )
 	if( err != nil ) {
@@ -55,4 +66,3 @@ func ArticleView(response http.ResponseWriter, request *http.Request)   {
 	var json,_ = json.Marshal(articleInfo)
 	response.Write(json)
 }
-

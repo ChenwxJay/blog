@@ -1,9 +1,12 @@
 package admin
 
 import "encoding/json"
-import "../model"
+import (
+	"../model"
+)
 
-var articleModel = model.Article{};
+var articleModel = model.Article{}
+var loginModel = model.Login{}
 
 type ResponseData struct {
 	Code int
@@ -15,4 +18,8 @@ func JsonData( code int , message string , data interface{} ) []byte {
 	responeData := ResponseData{code, message, data}
 	result , _ := json.Marshal(responeData)
 	return result
+}
+
+func LoginErrorResponse() []byte {
+	return  JsonData( 0, "登录失效", nil );
 }
