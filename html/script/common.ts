@@ -55,7 +55,7 @@ namespace chhblog{
             $.get("/admin/check_login", function( response ){
                 let data = eval("("+ response +")");
                 if( data.Code == 1 ) {
-                    window.top.location.href = "/";
+                    window.top.location.href = "/html/admin/login.html";
                 }
             });
         }

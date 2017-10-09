@@ -20,6 +20,7 @@ func main() {
 
 	//后端
 	http.HandleFunc("/admin/login", admin.Login );
+	http.HandleFunc("/admin/logout", admin.Logout );
 	http.HandleFunc("/admin/check_login", admin.CheckLogin )
 	http.HandleFunc("/admin/article_list", admin.ArticleList)
 	http.HandleFunc("/admin/article_add", admin.ArticleAdd)

@@ -2,6 +2,7 @@ package admin
 
 import (
 	"net/http"
+	"fmt"
 )
 
 
@@ -29,3 +30,25 @@ func CheckLogin( response http.ResponseWriter, request *http.Request ) {
 	response.Write(result);
 }
 
+func Logout( response http.ResponseWriter, request *http.Request)  {
+	fmt.Println(123)
+	userIdCookie,e1 := request.Cookie("user_id")
+	userNameCookie,e2 := request.Cookie("user_name")
+	userKeyCookie,e3 := request.Cookie("user_key")
+
+	if e1 == nil && e2 == nil && e3 == nil {
+		userIdCookie.MaxAge = -1
+		userIdCookie.Path = "/"
+
+		userNameCookie.MaxAge = -1
+		userNameCookie.Path = "/"
+
+		userKeyCookie.MaxAge = -1
+		userKeyCookie.Path = "/"
+
+		http.SetCookie( response,userIdCookie )
+		http.SetCookie( response,userNameCookie )
+		http.SetCookie( response,userKeyCookie )
+	}
+	http.Redirect( response, request, "/html/admin/login.html", http.StatusFound )
+}
