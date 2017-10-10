@@ -87,8 +87,9 @@ func (self *Article) GetArticleList( start int, end int, cateId int, kw string) 
 	limit := strconv.Itoa(start) + "," + strconv.Itoa(end);
 	where := " 1=1";
 	args := make([]interface{},0);
+	var cateIdString = strconv.Itoa(cateId)
 	if( cateId != 0 ) {
-		where += " and id in (select article_id from article_categories where cate_id in (select DISTINCT(id) from article_category where pid = "+ strconv.Itoa(cateId) +"))";
+		where += " and id in (select article_id from article_categories where cate_id in (select DISTINCT(id) from article_category where pid = "+ cateIdString +"  or id = "+ cateIdString +"))";
 	}
 	if( kw != "" ) {
 		args = append(args, kw);

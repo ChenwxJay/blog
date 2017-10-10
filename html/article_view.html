@@ -22,7 +22,13 @@
     </div>
 </div>
 </body>
+<script src="/html/script/jquery-3.1.1.min.js"></script>
 <link rel="stylesheet" href="/html/script/vs.min.css">
 <script src="/html/script/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+$("img").bind("click", function(){
+    window.open(this.src);
+}).css("cursor","pointer");
+</script>
 </html>
