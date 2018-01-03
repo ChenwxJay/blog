@@ -29,6 +29,8 @@ func main() {
 	http.HandleFunc("/admin/article_view", admin.ArticleView)
 	http.HandleFunc("/admin/article_edit", admin.ArticleEdit)
 
+	http.HandleFunc("/get_ip_info", web.GetIpInfo)
+
 	//UEditor上传图片
 	http.HandleFunc("/ueditor/go/controller", ueditor.Controller)
 	http.Handle("/static/", http.FileServer(http.Dir(".")))
