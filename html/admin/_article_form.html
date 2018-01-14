@@ -85,13 +85,6 @@
                                 <textarea id="content" name="content">
                                 </textarea>
                             </div>
-                            <script type="text/javascript">
-                                var ue;
-                                $(document).ajaxComplete(function () {
-                                    ue = UE.getEditor('content',{initialFrameHeight:300});
-                                })
-
-                            </script>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-1 control-label"></label>
@@ -172,19 +165,18 @@
     function initAddPage() {
         submit( "/admin/article_add" )
     }
-    
-    function fillForm( id ) {
-        $.get("/admin/article_view?id=" + id, ( response ) =>{
-            let data = eval("("+ response +")");
-            $("#title").val(data.title);
-            $("#author").val(data.author);
-            $("#cate").val(data.cate_id)
-            $("#content").val(data.content);;
-        });
-    }
-    
+
     function initEditPage( id ) {
-        fillForm(id);
+        var ue = UE.getEditor('content',{initialFrameHeight:300});
+        ue.ready(function(){
+            $.get("/admin/article_view?id=" + id, ( response ) =>{
+                let data = eval("("+ response +")");
+                $("#title").val(data.title);
+                $("#author").val(data.author);
+                $("#cate").val(data.cate_id)
+                ue.setContent(data.content);
+            });
+        });
         submit( "/admin/article_edit?id=" + id );
     }
     
