@@ -163,11 +163,18 @@
     }
 
     function initAddPage() {
+        UE.getEditor('content',{
+            initialFrameHeight:600,
+            autoHeightEnabled: false
+        });
         submit( "/admin/article_add" )
     }
 
     function initEditPage( id ) {
-        var ue = UE.getEditor('content',{initialFrameHeight:300});
+        var ue = UE.getEditor('content',{
+            initialFrameHeight:600,
+            autoHeightEnabled: false
+        });
         ue.ready(function(){
             $.get("/admin/article_view?id=" + id, ( response ) =>{
                 let data = eval("("+ response +")");
