@@ -5,10 +5,13 @@ import (
 	"./admin"
 	"net/http"
 	"./admin/ueditor"
+	"./common"
 )
 
 
 func main() {
+	common.LexemeCreate(2,1,`test`)
+
 	//前端
 	http.Handle("/log/", http.FileServer(http.Dir(".")))
 	http.Handle("/html/", http.FileServer(http.Dir(".")))
