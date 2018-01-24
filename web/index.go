@@ -35,8 +35,7 @@ func getQuery(  request *http.Request) (int, string)  {
 func attachArticleList( pageHtml string,   request *http.Request) string  {
 	pager := common.CreatePager(request,common.INDEX_PAGE_SIZE,common.NUMERIC_BUTTON_COUNT);
 	cateId, kw := getQuery(request);
-	start, end := pager.GetRange();
-	dataList, dataCount := articleModel.GetArticleList( start, end, cateId, kw);
+	dataList, dataCount := articleModel.GetArticleList( pager, cateId, kw);
 	pager.SetDataCount(dataCount);
 	var listHtml = "";
 	for _, item := range dataList {

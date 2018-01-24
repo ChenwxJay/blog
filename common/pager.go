@@ -39,6 +39,14 @@ type Pager struct {
 	NumericButtonCount int;
 }
 
+func (self *Pager) GetPageIndex() int  {
+	return self.PageIndex
+}
+
+func (self *Pager) GetPageSize() int  {
+	return self.PageSize
+}
+
 func (self *Pager) GetRange()( int , int )  {
 	var start = self.PageSize * ( self.PageIndex - 1 );
 	var end = start + self.PageSize ;

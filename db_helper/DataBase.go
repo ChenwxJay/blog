@@ -2,7 +2,6 @@ package DbHelper
 
 import (
 	"database/sql"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"../common/logger"
 )
@@ -70,7 +69,6 @@ func (self *dataBase) ExecuteSql(sql string,arg...interface{}) {
 		return
 	}
 	result, err := db.Query(sql,arg...)
-	fmt.Println(err)
 	if ( err != nil ) {
 		logger.OpenFileLogger().Println(err)
 		logger.CloseFileLogger()
@@ -97,7 +95,6 @@ func query2List(query *sql.Rows) []map[string]string {
 	for query.Next() {
 		//query.Scan查询出来的不定长值放到scans[i] = &values[i],也就是每行都放在values里
 		if err := query.Scan(scans...); err != nil {
-			fmt.Println(err)
 			return results
 		}
 		//每行数据

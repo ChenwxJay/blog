@@ -82,33 +82,45 @@ func HttpPost(url string, data map[string]string) (result string, resultErr erro
 const LEXEME_SYS_KEY  =   "chhblog"
 const LEXEME_URL_CREATE = "http://chhblog.com:8000/create"
 const LEXEME_URL_FIND = "http://chhblog.com:8000/find"
+const LEXEME_URL_DEL  = "http://chhblog.com:8000/delete";
 
-type LexemeFindResult struct {
-	DataList []int
+const ARTICLE_LEXEME_TYPE  = 1
+
+type LexemeDataItem struct {
+	ID int
+	Count int
+}
+
+type LexemeFoundResult struct {
+	DataList []LexemeDataItem
 	DataCount int
 }
 
 type LemexeServiceResult struct {
 	Code int
 	Message string
-	Data LexemeFindResult
+	Data LexemeFoundResult
 }
 
-func json2lexemeServiceResult( jsonString string )  *LemexeServiceResult {
-	var newJson = strings.Replace(jsonString,"code","Code",-1)
-	newJson = strings.Replace(newJson,"message","Message",-1)
-	newJson = strings.Replace(newJson,"data","Data",-1)
+//排序
+type LexemeDataItemSortList []LexemeDataItem
 
-	var regex = regexp.MustCompile(`\[(\[[^\]]*]),(\d+)]`)
-	var replaceResult = regex.ReplaceAllStringFunc(newJson, func( match string ) string {
-		var group = regex.FindStringSubmatch(match)
-		var dataList = group[1]
-		var dataCount = group[2]
-		var converted = "{\"DataList\":"+ dataList +",\"DataCount\":"+ dataCount +"}"
-		return converted
-	})
+func (self LexemeDataItemSortList) Len() int  {
+	return len(self)
+}
+
+func (self LexemeDataItemSortList)  Less(i, j int) bool  {
+	return self[i].Count > self[j].Count
+}
+
+func (self LexemeDataItemSortList)  Swap(i, j int)   {
+	self[i], self[j] = self[j], self[i]
+}
+//结束
+
+func json2lexemeServiceResult( jsonString string )  *LemexeServiceResult {
 	var result = new( LemexeServiceResult )
-	var err = json.Unmarshal([]byte(replaceResult),result)
+	var err = json.Unmarshal([]byte(jsonString),result)
 	if err != nil {
 		return nil
 	} else {
@@ -116,13 +128,7 @@ func json2lexemeServiceResult( jsonString string )  *LemexeServiceResult {
 	}
 }
 
-func LexemeCreate(dataId int, _type int, text string) bool {
-	var data = make(map[string]string)
-	data["text"] = text
-	data["data_id"] = strconv.Itoa( dataId )
-	data["type"] = strconv.Itoa( _type )
-	data["sys_key"] = LEXEME_SYS_KEY
-	var jsonResult,err = HttpPost(LEXEME_URL_CREATE, data)
+func result( jsonResult string , err error) bool  {
 	if err != nil {
 		return false
 	}
@@ -136,7 +142,17 @@ func LexemeCreate(dataId int, _type int, text string) bool {
 	return true;
 }
 
-func LexemeFind(text string, _type int, pageIndex int, pageSize int) (dataCount int, dataList []int)  {
+func LexemeCreate(dataId int, _type int, text string) bool {
+	var data = make(map[string]string)
+	data["text"] = text
+	data["data_id"] = strconv.Itoa( dataId )
+	data["type"] = strconv.Itoa( _type )
+	data["sys_key"] = LEXEME_SYS_KEY
+	var jsonResult,err = HttpPost(LEXEME_URL_CREATE, data)
+	return result(jsonResult, err)
+}
+
+func LexemeFind(text string, _type int, pageIndex int, pageSize int) LexemeFoundResult  {
 	var data = make(map[string]string)
 	data["text"] = text
 	data["page_index"] = strconv.Itoa( pageIndex )
@@ -145,8 +161,17 @@ func LexemeFind(text string, _type int, pageIndex int, pageSize int) (dataCount 
 	data["sys_key"] = LEXEME_SYS_KEY
 	var jsonResult,err = HttpPost(LEXEME_URL_FIND, data)
 	if err != nil {
-		return 0,make([]int,0)
+		return LexemeFoundResult{}
 	}
 	var serviceResult = json2lexemeServiceResult(jsonResult)
-	return serviceResult.Data.DataCount, serviceResult.Data.DataList
+	return serviceResult.Data
+}
+
+func LexemeDelete( dataId int,_type int ) bool {
+	var data = make(map[string]string)
+	data["data_id"] = strconv.Itoa( dataId )
+	data["type"] = strconv.Itoa( _type )
+	data["sys_key"] = LEXEME_SYS_KEY
+	var jsonResult,err = HttpPost(LEXEME_URL_DEL, data)
+	return result(jsonResult, err)
 }
