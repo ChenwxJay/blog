@@ -15,14 +15,28 @@ type ArticleView struct{
 }
 
 func ( self * ArticleView ) ServeHTTP( response http.ResponseWriter, request *http.Request ) {
-	pageContent := common.GetFileContent("html/article_view.html");
 	id, error := strconv.Atoi( request.FormValue("id") )
 	if( error != nil ) {
 		response.Write([]byte("参数错误"));
 		return ;
 	}
-	article := model.Article{};
-	data := article.GetArticle(id);
+	var pageContentOut = make(chan string)
+	go func() {
+		var pageContent = common.GetFileContent("html/article_view.html");
+		pageContentOut <- pageContent
+		close(pageContentOut)
+	}()
+	var articleDataOut = make( chan map[string]string )
+	go func() {
+		var article = model.Article{};
+		var data = article.GetArticle(id);
+		articleDataOut <- data
+		close(articleDataOut)
+	}()
+
+	var pageContent = <- pageContentOut
+	var data = <- articleDataOut
+
 	pageContent = strings.Replace(pageContent, "${title}",data["title"],-1);
 	pageContent = strings.Replace(pageContent, "${content}",data["content"],-1);
 	pageContent = code(pageContent);

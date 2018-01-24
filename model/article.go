@@ -56,18 +56,34 @@ func (self *Article) DelArticle( id int)  {
 }
 
 func (self *Article) GetArticle( id int) (map[string]string)  {
-	sql := "select * from article where id = " + strconv.Itoa(id);
-	result := DbHelper.GetDataBase().Query(sql);
-	if(  len(result) > 0 ) {
-		var topCateIDs = self.getTopCateIDs(id)
-		if len(topCateIDs) > 0  {
-			result[0]["cate_id"] = strconv.Itoa( topCateIDs[0] )
-		} else {
-			result[0]["cate_id"] = "0"
+	var db = DbHelper.GetDataBase()
+	var articleOut = make(chan map[string]string)
+	go func() {
+		var sql = "select * from article where id = " + strconv.Itoa(id);
+		var result = db.Query(sql);
+		if len(result) > 0 {
+			articleOut <- result[0]
 		}
-		return result[0];
+		close(articleOut)
+	}()
+
+	var topCateIDsOut = make(chan string)
+	go func() {
+		var topCateIDs = self.getTopCateIDs(id)
+		var result = "0";
+		if len(topCateIDs) > 0  {
+			result = strconv.Itoa( topCateIDs[0] )
+		}
+		topCateIDsOut <- result
+		close(topCateIDsOut)
+	}()
+
+	var result = <- articleOut;
+	if( len(result) > 0 ) {
+		result["cate_id"] = <- topCateIDsOut
+		return result;
 	} else {
-		return nil;
+		return nil
 	}
 }
 
