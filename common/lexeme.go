@@ -34,7 +34,7 @@ func extractValidCharacters(input string) string {
 	var entitiesRegex = regexp.MustCompile(`&[^;]+;`)
 	output = entitiesRegex.ReplaceAllString(output,"")
 	//过滤非语言文字字符
-	var charRegex = regexp.MustCompile("[^\u4e00-\u9fa5a-zA-Z0-9]")
+	var charRegex = regexp.MustCompile("[^\u4e00-\u9fa5a-zA-Z0-9\\s]")
 	output = charRegex.ReplaceAllString(output,"")
 	return output
 }
