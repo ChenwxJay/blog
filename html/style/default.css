@@ -30,5 +30,5 @@ a.small:hover, a.small:active{ text-decoration: underline;}
 .page span{ display: inline-block; padding:0 3px;}
 .page a:link,.page a:visited,.page a:hover,.page a:active{display: inline-block; padding:0 3px; text-decoration: underline;}
 
-.social{ position: fixed; right: 20px; top: 5px;  background: white;}
+.social{ position: fixed; right: 20px; top: 5px; }
 .social a{ display: inline-block; margin-left: 5px; color: darkblue; font-size: 14px;}
