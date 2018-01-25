@@ -5,22 +5,26 @@ import (
 	"./admin"
 	"net/http"
 	"./admin/ueditor"
+	"./common/config_manger"
 )
 
 
 func main() {
+	//检查配置文件
+	config_manager.CheckConfig()
+
 	//前端
 	http.Handle("/log/", http.FileServer(http.Dir(".")))
 	http.Handle("/html/", http.FileServer(http.Dir(".")))
 	http.Handle("/upload/", http.FileServer(http.Dir(".")))
 	http.Handle("/ueditor/", http.FileServer(http.Dir(".")))
-	http.Handle("/", new(web.Index));
-	http.Handle("/index", new(web.Index));
-	http.Handle("/article_view", new(web.ArticleView));
+	http.Handle("/", new(web.Index))
+	http.Handle("/index", new(web.Index))
+	http.Handle("/article_view", new(web.ArticleView))
 
 	//后端
-	http.HandleFunc("/admin/login", admin.Login );
-	http.HandleFunc("/admin/logout", admin.Logout );
+	http.HandleFunc("/admin/login", admin.Login )
+	http.HandleFunc("/admin/logout", admin.Logout )
 	http.HandleFunc("/admin/check_login", admin.CheckLogin )
 	http.HandleFunc("/admin/article_list", admin.ArticleList)
 	http.HandleFunc("/admin/article_add", admin.ArticleAdd)
@@ -35,6 +39,6 @@ func main() {
 	http.HandleFunc("/ueditor/go/controller", ueditor.Controller)
 	http.Handle("/static/", http.FileServer(http.Dir(".")))
 
-	http.ListenAndServe(":9529", nil);
+	http.ListenAndServe(":9529", nil)
 }
 

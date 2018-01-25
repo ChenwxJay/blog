@@ -9,6 +9,7 @@ import (
 	"errors"
 	"regexp"
 	"encoding/json"
+	"./config_manger"
 )
 
 func interface2Error(data interface{}) error {
@@ -76,13 +77,16 @@ func HttpPost(url string, data map[string]string) (result string, resultErr erro
 	if err != nil {
 		return "", err
 	}
-	return string(body), nil;
+	return string(body), nil
 }
 
-const LEXEME_SYS_KEY  =   "chhblog"
-const LEXEME_URL_CREATE = "http://chhblog.com:8000/create"
-const LEXEME_URL_FIND = "http://chhblog.com:8000/find"
-const LEXEME_URL_DEL  = "http://chhblog.com:8000/delete";
+
+var config  = config_manager.GetConfig()
+var LEXEME_SYS_KEY  =  config.LexemeKey
+var LEXEME_URL_BASE = config.LexemeUrl
+var LEXEME_URL_CREATE =  LEXEME_URL_BASE + "/create"
+var LEXEME_URL_FIND = LEXEME_URL_BASE + "/find"
+var LEXEME_URL_DEL  = LEXEME_URL_BASE + "/delete"
 
 const ARTICLE_LEXEME_TYPE  = 1
 
@@ -110,7 +114,13 @@ func (self LexemeDataItemSortList) Len() int  {
 }
 
 func (self LexemeDataItemSortList)  Less(i, j int) bool  {
-	return self[i].Count > self[j].Count
+	var iItem = self[i]
+	var jItem = self[j]
+	if iItem.Count != jItem.Count {
+		return iItem.Count > jItem.Count
+	} else {
+		return iItem.ID > jItem.ID
+	}
 }
 
 func (self LexemeDataItemSortList)  Swap(i, j int)   {

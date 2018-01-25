@@ -8,11 +8,13 @@ import (
 
 type configs struct  {
 	ConnectingString string
+	LexemeUrl string
+	LexemeKey string
 }
 
 var configData *configs
 
-func getConnectionConfig() (config *configs, err error)   {
+func getConfig() (config *configs, err error)   {
 	if configData != nil {
 		return configData, nil
 	}
@@ -34,12 +36,39 @@ func getConnectionConfig() (config *configs, err error)   {
 	return result, nil
 }
 
+func GetConfig() *configs {
+	config, err := getConfig()
+	if err != nil {
+		return nil
+	} else {
+		return config
+	}
+}
+
 func GetDbConnectionString()( connectionString string, err error){
-	config, err := getConnectionConfig()
+	config, err := getConfig()
 	if err == nil {
 		 return config.ConnectingString, nil
 	} else {
 		return "", err
+	}
+}
+
+func CheckConfig()  {
+	config, err := getConfig()
+	if err == nil {
+		if config.ConnectingString == "" {
+			panic("数据库连接字符串未配置")
+		}
+		if config.LexemeKey == "" {
+			panic("分词系统标识未配置")
+		}
+		if config.LexemeUrl == "" {
+			panic("分词系统URL未配置")
+		}
+
+	} else {
+		panic("配置文件读取失败")
 	}
 }
 

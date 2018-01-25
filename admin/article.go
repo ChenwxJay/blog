@@ -51,13 +51,16 @@ func ArticleEdit(response http.ResponseWriter, request *http.Request) {
 }
 
 func ArticleDel(response http.ResponseWriter, request *http.Request) {
-	if( !loginModel.IsLogin(request)) {
-		response.Write(LoginErrorResponse());
+	if !loginModel.IsLogin(request) {
+		response.Write(LoginErrorResponse())
 		return
 	}
 	var id = request.FormValue("id")
 	var intId ,_ = strconv.Atoi(id)
 	articleModel.DelArticle(intId)
+	go func() {
+		common.LexemeDelete(intId,common.ARTICLE_LEXEME_TYPE)
+	}()
 	response.Write(JsonData(0,"删除成功",nil))
 }
 
