@@ -5,7 +5,14 @@ import (
 	"encoding/json"
 	"strconv"
 	"../common"
+	"../model"
 )
+
+func CateList(response http.ResponseWriter, request *http.Request) {
+	var cateList = articleModel.GetCates(model.OrderByNumDesc)
+	var json,_ = json.Marshal(cateList)
+	response.Write(json)
+}
 
 func ArticleList(response http.ResponseWriter, request *http.Request) {
 	articleList := articleModel.GetAll();
@@ -14,7 +21,7 @@ func ArticleList(response http.ResponseWriter, request *http.Request) {
 }
 
 func ArticleAdd(response http.ResponseWriter, request *http.Request) {
-	if( !loginModel.IsLogin(request)) {
+	if !loginModel.IsLogin(request) {
 		response.Write(LoginErrorResponse());
 		return
 	}
@@ -32,7 +39,7 @@ func ArticleAdd(response http.ResponseWriter, request *http.Request) {
 
 
 func ArticleEdit(response http.ResponseWriter, request *http.Request) {
-	if( !loginModel.IsLogin(request)) {
+	if !loginModel.IsLogin(request) {
 		response.Write(LoginErrorResponse());
 		return
 	}
@@ -65,7 +72,7 @@ func ArticleDel(response http.ResponseWriter, request *http.Request) {
 }
 
 func ArticleCates(response http.ResponseWriter, request *http.Request)   {
-	var cates = articleModel.GetCates()
+	var cates = articleModel.GetCates(model.OrderByNumAsc)
 	var json,_ = json.Marshal(cates)
 	response.Write(json)
 }

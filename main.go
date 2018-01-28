@@ -33,6 +33,8 @@ func main() {
 	http.HandleFunc("/admin/article_view", admin.ArticleView)
 	http.HandleFunc("/admin/article_edit", admin.ArticleEdit)
 
+	http.HandleFunc("/admin/cate_list", admin.CateList)
+
 	http.HandleFunc("/get_ip_info", web.GetIpInfo)
 
 	//UEditor上传图片

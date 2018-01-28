@@ -52,7 +52,7 @@ func attachArticleList( pageHtml string,   request *http.Request) string  {
 
 func attachCateHtml( pageHtml string )  string {
 	article := model.Article{};
-	cates := article.GetCates();
+	cates := article.GetCates( model.OrderByNumAsc)
 	var html string = "";
 	for _, item := range cates {
 		html += `<li>

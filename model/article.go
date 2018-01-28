@@ -181,18 +181,30 @@ func (self *Article) GetArticleList( pager common.Pager, cateId int, kw string) 
 	return dataList,dataCount;
 }
 
+type orderByNum int
 
-func ( self * Article ) GetCates()  []map[string]string {
-	sql := "select id, name from article_category where pid = 0 order by num asc";
-	result := DbHelper.GetDataBase().Query(sql);
-	return result;
+const(
+	OrderByNumAsc orderByNum = iota
+	OrderByNumDesc
+)
+
+func ( self * Article ) GetCates( orderByNum orderByNum )  []map[string]string {
+	var orderByString = ""
+	if orderByNum == OrderByNumAsc {
+		orderByString = " order by num asc"
+	} else if orderByNum == OrderByNumDesc {
+		orderByString = " order by num desc"
+	}
+	sql := "select id, name, num, add_date from article_category where pid = 0  " + orderByString
+	result := DbHelper.GetDataBase().Query(sql)
+	return result
 }
 
 func ( self * Article ) GetCateName( cateId int ) string {
-	sql := "select name from article_category where id = " + strconv.Itoa( cateId );
-	result := DbHelper.GetDataBase().GetSingle(sql);
-	if( result == "") {
-		return "所有文章";
+	sql := "select name from article_category where id = " + strconv.Itoa( cateId )
+	result := DbHelper.GetDataBase().GetSingle(sql)
+	if result == "" {
+		return "所有文章"
 	}
-	return result;
+	return result
 }
