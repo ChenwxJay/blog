@@ -7,6 +7,7 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"errors"
 )
 
 //func ExecLexeme()  {
@@ -207,4 +208,35 @@ func ( self * Article ) GetCateName( cateId int ) string {
 		return "所有文章"
 	}
 	return result
+}
+
+func (self *Article) AddCate( name string, orderNum int ) error  {
+	var countSql = "select count(*) from article_category where name = ?"
+	var count,_ = strconv.Atoi( DbHelper.GetDataBase().GetSingle(countSql,name) )
+	if count > 0 {
+		return errors.New("类别名称已经存在")
+	}
+	var insertSql = "insert into  article_category(name,num,pid,add_date) values(?,?,0,CURRENT_TIMESTAMP())"
+	DbHelper.GetDataBase().Query(insertSql,name,orderNum)
+	return nil
+}
+
+func  (self *Article) EditCate( id int, name string, orderNum int )  {
+	var sql = "update article_category set name = ? , num = ? where id = ?"
+	DbHelper.GetDataBase().ExecuteSql(sql,name,orderNum,id)
+}
+
+func  (self *Article) DelCate( id int )  {
+	var sql = "delete from article_category where id = ?"
+	DbHelper.GetDataBase().Query(sql,id)
+}
+
+func (self *Article) GetCate(id int) map[string]string  {
+	var sql = "select * from article_category where id = ?"
+	var result = DbHelper.GetDataBase().Query(sql,id)
+	if len(result) > 0 {
+		return result[0]
+	} else {
+		return nil
+	}
 }

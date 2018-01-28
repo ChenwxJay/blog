@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+
+<!-- Mirrored from www.zi-han.net/theme/hplus/form_basic.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 20 Jan 2016 14:19:15 GMT -->
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="favicon.ico"> <link href="css/bootstrap.min14ed.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.min93e3.css?v=4.4.0" rel="stylesheet">
+    <link href="css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="css/animate.min.css" rel="stylesheet">
+    <link href="css/style.min862f.css?v=4.1.0" rel="stylesheet">
+
+    <script src="js/jquery.min.js?v=2.1.4"></script>
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>编辑类别<small></small></h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="form_basic.html#">
+                            <i class="fa fa-wrench"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-user">
+                            <li><a href="form_basic.html#">选项1</a>
+                            </li>
+                            <li><a href="form_basic.html#">选项2</a>
+                            </li>
+                        </ul>
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form onsubmit="return false;" class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-1 control-label">类别名称</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="name">
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-1 control-label">排序号码</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="num">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-1 control-label"></label>
+                            <div class="col-sm-10">
+                                <button class="btn btn-primary" id="submit_btn">保存内容</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/content.min.js?v=1.0.0"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+<script src="js/plugins/iCheck/icheck.min.js"></script>
+<script src="/html/script/common.js"></script>
+<script>
+    $(document).ready(function(){$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})});
+</script>
+</body>
+
+<script type="text/javascript">
+
+    function submit( url ) {
+        $("#submit_btn").bind("click", ()=>{
+            let name = $.trim( $("#name").val() );
+            let num = $.trim( $("#num").val() );
+            if( name == "") {
+                parent.layer.msg( "请输入名称", {time: 1000} );
+                return;
+            }
+            if(num == "") {
+                parent.layer.msg( "请输入排序号码", {time: 1000} );
+                return;
+            }
+            if(!/^\d+$/.test(num)) {
+                parent.layer.msg( "排序号码必须为数字", {time: 1000} );
+                return;
+            }
+
+            let ajaxSetting = {};
+            ajaxSetting.url = url;
+            ajaxSetting.dataType = "JSON";
+            ajaxSetting.type = "POST";
+            ajaxSetting.data = {name:name,num:num};
+            ajaxSetting.success = function(response) {
+                parent.layer.msg( response.Message, {time: 1000}, function () {
+                    if(response.Code == 0) {
+                        window.location.href = "_article_cate_list.html";
+                    }
+                } );
+            }
+            $.ajax(ajaxSetting);
+        });
+    }
+
+    function initAddPage() {
+        submit( "/admin/cate_add" )
+    }
+
+    function initEditPage( id ) {
+        $.get("/admin/cate_item?id=" + id, ( response ) =>{
+            let data = eval("("+ response +")");
+            $("#name").val(data.name);
+            $("#num").val(data.num);
+        });
+        submit( "/admin/cate_edit?id=" + id );
+    }
+    
+    function init() {
+        var id = chhblog.queryString().get("id");
+        if( id != null) {
+            initEditPage( id );
+        } else {
+            initAddPage();
+        }
+    }
+    
+    init();
+
+</script>
+
+</html>

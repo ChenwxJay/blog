@@ -32,8 +32,12 @@ func main() {
 	http.HandleFunc("/admin/article_cates", admin.ArticleCates)
 	http.HandleFunc("/admin/article_view", admin.ArticleView)
 	http.HandleFunc("/admin/article_edit", admin.ArticleEdit)
-
+	http.HandleFunc("/admin/cate_add", admin.CateAdd)
+	http.HandleFunc("/admin/cate_edit", admin.CateEdit)
+	http.HandleFunc("/admin/cate_del", admin.CateDel)
+	http.HandleFunc("/admin/cate_item", admin.CateItem)
 	http.HandleFunc("/admin/cate_list", admin.CateList)
+
 
 	http.HandleFunc("/get_ip_info", web.GetIpInfo)
 
