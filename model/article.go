@@ -29,23 +29,36 @@ import (
 type Article struct {}
 
 func (self *Article) AddArticle(title string, cate string, author string, content string) int {
-	var sql = "insert into article (title, author, content, show_time, add_time, read_count, is_commend ) values (?,?,?,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP(),0,0)";
-	DbHelper.GetDataBase().ExecuteSql(sql,title,author,content);
+	var sql = "insert into article (title, author, content, show_time, add_time, read_count, is_commend ) values (?,?,?,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP(),0,0)"
+	DbHelper.GetDataBase().ExecuteSql(sql,title,author,content)
 	var identitySql = "select max(id) from article"
 	var articleId = DbHelper.GetDataBase().GetSingle(identitySql)
-	var addCateSql = "insert into article_categories(article_id,cate_id) values (?,?)"
-	DbHelper.GetDataBase().ExecuteSql(addCateSql,articleId,cate)
 	var iArticle,_ = strconv.Atoi(articleId)
+	if cate == "" {
+		return iArticle
+	}
+	go func() {
+		var cateIds = strings.Split(cate,",")
+		for _, cateId := range cateIds {
+			var addCateSql = "insert into article_categories(article_id,cate_id) values (?,?)"
+			DbHelper.GetDataBase().ExecuteSql(addCateSql,articleId,cateId)
+		}
+	}()
 	return iArticle
 }
 
 func (self *Article) EditArticle(articleId int , title string, cate string, author string, content string)  {
-	var sql = "update article set title = ?, author = ?, content = ? where id = ?";
-	DbHelper.GetDataBase().ExecuteSql(sql,title,author,content,articleId);
-	var delSql = "delete from article_categories where article_id = ?";
+	var sql = "update article set title = ?, author = ?, content = ? where id = ?"
+	DbHelper.GetDataBase().ExecuteSql(sql,title,author,content,articleId)
+	var delSql = "delete from article_categories where article_id = ?"
 	DbHelper.GetDataBase().ExecuteSql(delSql,articleId)
-	var addCateSql = "insert into article_categories(article_id,cate_id) values (?,?)"
-	DbHelper.GetDataBase().ExecuteSql(addCateSql,articleId,cate)
+	go func() {
+		var cateIds = strings.Split(cate,",")
+		for _, cateId := range cateIds {
+			var addCateSql = "insert into article_categories(article_id,cate_id) values (?,?)"
+			DbHelper.GetDataBase().ExecuteSql(addCateSql,articleId,cateId)
+		}
+	}()
 }
 
 func (self *Article) DelArticle( id int)  {
@@ -57,8 +70,8 @@ func (self *Article) GetArticle( id int) (map[string]string)  {
 	var db = DbHelper.GetDataBase()
 	var articleOut = make(chan map[string]string)
 	go func() {
-		var sql = "select * from article where id = " + strconv.Itoa(id);
-		var result = db.Query(sql);
+		var sql = "select * from article where id = " + strconv.Itoa(id)
+		var result = db.Query(sql)
 		if len(result) > 0 {
 			articleOut <- result[0]
 		}
@@ -67,25 +80,26 @@ func (self *Article) GetArticle( id int) (map[string]string)  {
 
 	var topCateIDsOut = make(chan string)
 	go func() {
-		var topCateIDs = self.getTopCateIDs(id)
-		var result = "0";
+		var topCateIDs = self.getLevel0CateIDs(id)
+		var result = "0"
 		if len(topCateIDs) > 0  {
-			result = strconv.Itoa( topCateIDs[0] )
+			result = strings.Join(common.IntArray2StringArray(topCateIDs),",")
+			//result = strconv.Itoa( topCateIDs[0] )
 		}
 		topCateIDsOut <- result
 		close(topCateIDsOut)
 	}()
 
-	var result = <- articleOut;
+	var result = <- articleOut
 	if len(result) > 0 {
 		result["cate_id"] = <- topCateIDsOut
-		return result;
+		return result
 	} else {
 		return nil
 	}
 }
 
-func (self *Article) getTopCateId( cateId int ) int {
+func (self *Article) getLevel0CateId( cateId int ) int {
 	var sql = "select id, pid from article_category where id =  " + strconv.Itoa( cateId )
 	var result = DbHelper.GetDataBase().Query(sql)
 	if len(result) == 0 {
@@ -97,18 +111,18 @@ func (self *Article) getTopCateId( cateId int ) int {
 	if pid == 0  {
 		return id
 	} else {
-		return self.getTopCateId(pid)
+		return self.getLevel0CateId(pid)
 	}
 }
 
 
-func (self *Article) getTopCateIDs( articleId int ) []int {
+func (self *Article) getLevel0CateIDs( articleId int ) []int {
 	var sql = "select cate_id from article_categories where article_id = " + strconv.Itoa( articleId )
 	var cateIDs = DbHelper.GetDataBase().Query(sql)
 	var topCateIDs = make([]int,0)
 	for _, item := range cateIDs {
 		var cateId,_ = strconv.Atoi( item["cate_id"] )
-		topCateIDs = append(topCateIDs, self.getTopCateId(cateId))
+		topCateIDs = append(topCateIDs, self.getLevel0CateId(cateId))
 	}
 	return topCateIDs
 }
@@ -176,15 +190,15 @@ func (self *Article) sortResult( dataList []map[string]string, idListRefable str
 func (self *Article) GetArticleList( pager common.Pager, cateId int, kw string) ([]map[string]string, int)  {
 	var start, _ = pager.GetRange()
 	var pageSize = pager.GetPageSize()
-	kw = common.Trim(kw);
-	var limit = strconv.Itoa(start) + "," + strconv.Itoa(pageSize);
-	var where = " 1=1";
+	kw = common.Trim(kw)
+	var limit = strconv.Itoa(start) + "," + strconv.Itoa(pageSize)
+	var where = " 1=1"
 	var orderBy = " order by id desc "
 	var ids = ""
-	args := make([]interface{},0);
+	args := make([]interface{},0)
 	var cateIdString = strconv.Itoa( cateId )
 	if cateId != 0 {
-		where += " and id in (select article_id from article_categories where cate_id in (select DISTINCT(id) from article_category where pid = "+ cateIdString +"  or id = "+ cateIdString +"))";
+		where += " and id in (select article_id from article_categories where cate_id in (select DISTINCT(id) from article_category where pid = "+ cateIdString +"  or id = "+ cateIdString +"))"
 	}
 	if kw != "" {
 		var lexemeResult = common.LexemeFind( kw, common.ARTICLE_LEXEME_TYPE, 1, math.MaxInt32 )
@@ -198,11 +212,11 @@ func (self *Article) GetArticleList( pager common.Pager, cateId int, kw string) 
 			where += " and 1 = 2 "
 		}
 	}
-	var countSql = "select count(1) from article where " + where ;
-	var sql = "select id , title from article where "+ where +  orderBy + " limit " + limit;
-	dataCount,_:= strconv.Atoi( DbHelper.GetDataBase().GetSingle(countSql,args...) );
-	dataList := DbHelper.GetDataBase().Query(sql,args...);
+	var countSql = "select count(1) from article where " + where 
+	var sql = "select id , title from article where "+ where +  orderBy + " limit " + limit
+	dataCount,_:= strconv.Atoi( DbHelper.GetDataBase().GetSingle(countSql,args...) )
+	dataList := DbHelper.GetDataBase().Query(sql,args...)
 	dataList = self.sortResult(dataList, ids)
-	return dataList,dataCount;
+	return dataList,dataCount
 }
 

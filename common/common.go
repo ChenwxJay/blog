@@ -12,6 +12,7 @@ import (
 	"os"
 	"io/ioutil"
 	"../common/logger"
+	"strconv"
 )
 
 func IsNullOrEmpty( str string ) bool{
@@ -98,5 +99,13 @@ func GetFileContent( path string ) string  {
 		return ""
 	}
 	result := string(data)
+	return result
+}
+
+func IntArray2StringArray( intArray []int) []string  {
+	var result = make([]string,0)
+	for _, item := range intArray {
+		result = append(result,strconv.Itoa(item))
+	}
 	return result
 }
