@@ -7,6 +7,7 @@ import (
 
 var articleModel = model.Article{}
 var loginModel = model.Login{}
+var articleCateModel = model.ArticleCate{}
 
 type ResponseData struct {
 	Code int

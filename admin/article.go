@@ -11,7 +11,7 @@ import (
 func CateItem(response http.ResponseWriter, request *http.Request) {
 	var id = request.FormValue("id")
 	var iid,_ = strconv.Atoi(id)
-	var result = articleModel.GetCate(iid)
+	var result = articleCateModel.GetCate(iid)
 	json,_ := json.Marshal(result)
 	response.Write(json)
 }
@@ -19,7 +19,7 @@ func CateItem(response http.ResponseWriter, request *http.Request) {
 func CateDel(response http.ResponseWriter, request *http.Request) {
 	var id = request.FormValue("id")
 	var iid ,_ = strconv.Atoi(id)
-	articleModel.DelCate(iid)
+	articleCateModel.DelCate(iid)
 	response.Write(JsonData(0,"删除成功",nil))
 }
 
@@ -29,7 +29,7 @@ func CateEdit(response http.ResponseWriter, request *http.Request) {
 	var id = request.FormValue("id")
 	var iid ,_ = strconv.Atoi(id)
 	var iNum,_ = strconv.Atoi(num)
-	articleModel.EditCate(iid,name,iNum)
+	articleCateModel.EditCate(iid,name,iNum)
 	response.Write(JsonData(0,"编辑成功",nil))
 }
 
@@ -37,7 +37,7 @@ func CateAdd(response http.ResponseWriter, request *http.Request) {
 	var name = request.FormValue("name")
 	var num = request.FormValue("num")
 	var iNum,_ = strconv.Atoi(num)
-	var err = articleModel.AddCate(name, iNum)
+	var err = articleCateModel.AddCate(name, iNum)
 	if err != nil {
 		response.Write(JsonData(1,err.Error(),nil))
 	} else {
@@ -46,7 +46,7 @@ func CateAdd(response http.ResponseWriter, request *http.Request) {
 }
 
 func CateList(response http.ResponseWriter, request *http.Request) {
-	var cateList = articleModel.GetCates(model.OrderByNumDesc)
+	var cateList = articleCateModel.GetCates(model.OrderByNumDesc)
 	var json,_ = json.Marshal(cateList)
 	response.Write(json)
 }
@@ -109,14 +109,14 @@ func ArticleDel(response http.ResponseWriter, request *http.Request) {
 }
 
 func ArticleCates(response http.ResponseWriter, request *http.Request)   {
-	var cates = articleModel.GetCates(model.OrderByNumAsc)
+	var cates = articleCateModel.GetCates(model.OrderByNumAsc)
 	var json,_ = json.Marshal(cates)
 	response.Write(json)
 }
 
 func ArticleView(response http.ResponseWriter, request *http.Request)   {
 	var id,err = strconv.Atoi( request.FormValue("id") )
-	if( err != nil ) {
+	if err != nil {
 		return
 	}
 	var articleInfo = articleModel.GetArticle(id)

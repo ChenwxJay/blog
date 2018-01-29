@@ -7,7 +7,6 @@ import (
 	"math"
 	"sort"
 	"strings"
-	"errors"
 )
 
 //func ExecLexeme()  {
@@ -27,9 +26,7 @@ import (
 //	fmt.Println("执行结束")
 //}
 
-type Article struct {
-
-}
+type Article struct {}
 
 func (self *Article) AddArticle(title string, cate string, author string, content string) int {
 	var sql = "insert into article (title, author, content, show_time, add_time, read_count, is_commend ) values (?,?,?,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP(),0,0)";
@@ -80,7 +77,7 @@ func (self *Article) GetArticle( id int) (map[string]string)  {
 	}()
 
 	var result = <- articleOut;
-	if( len(result) > 0 ) {
+	if len(result) > 0 {
 		result["cate_id"] = <- topCateIDsOut
 		return result;
 	} else {
@@ -91,7 +88,7 @@ func (self *Article) GetArticle( id int) (map[string]string)  {
 func (self *Article) getTopCateId( cateId int ) int {
 	var sql = "select id, pid from article_category where id =  " + strconv.Itoa( cateId )
 	var result = DbHelper.GetDataBase().Query(sql)
-	if( len(result) == 0 ) {
+	if len(result) == 0 {
 		return cateId
 	}
 	var item = result[0]
@@ -117,8 +114,35 @@ func (self *Article) getTopCateIDs( articleId int ) []int {
 }
 
 func (self *Article) GetAll() []map[string]string {
-	sql := "select id, title, author ,add_time from article order by id desc";
-	return DbHelper.GetDataBase().Query(sql);
+	var articleCateSql = `select a.article_id,
+									group_concat(  b.name ) as cate_name
+							from article_categories as  a
+							LEFT JOIN  article_category as b
+							on a.cate_id = b.id
+							GROUP BY article_id`
+	var articleSql = "select id, title, author ,add_time from article order by id desc"
+	var articleCateOut = make(chan []map[string]string)
+	var articleListOut = make(chan []map[string]string)
+	go func() {
+		var cateList = DbHelper.GetDataBase().Query(articleCateSql)
+		articleCateOut <- cateList
+		close(articleCateOut)
+	}()
+	go func() {
+		var articleList = DbHelper.GetDataBase().Query(articleSql)
+		articleListOut <- articleList
+		close(articleListOut)
+	}()
+	var articleCateList = <- articleCateOut
+	var articleList = <- articleListOut
+	for index, articleItem := range articleList {
+		for _, cateItem := range articleCateList {
+			if articleItem["id"] == cateItem["article_id"] {
+				articleList[index]["cates"] = cateItem["cate_name"]
+			}
+		}
+	}
+	return articleList
 }
 
 func (self *Article) lexemeInCondition( articleIdInfo []common.LexemeDataItem  ) string {
@@ -159,10 +183,10 @@ func (self *Article) GetArticleList( pager common.Pager, cateId int, kw string) 
 	var ids = ""
 	args := make([]interface{},0);
 	var cateIdString = strconv.Itoa( cateId )
-	if( cateId != 0 ) {
+	if cateId != 0 {
 		where += " and id in (select article_id from article_categories where cate_id in (select DISTINCT(id) from article_category where pid = "+ cateIdString +"  or id = "+ cateIdString +"))";
 	}
-	if( kw != "" ) {
+	if kw != "" {
 		var lexemeResult = common.LexemeFind( kw, common.ARTICLE_LEXEME_TYPE, 1, math.MaxInt32 )
 		if lexemeResult.DataCount > 0  {
 			ids = self.lexemeInCondition(lexemeResult.DataList)
@@ -182,61 +206,3 @@ func (self *Article) GetArticleList( pager common.Pager, cateId int, kw string) 
 	return dataList,dataCount;
 }
 
-type orderByNum int
-
-const(
-	OrderByNumAsc orderByNum = iota
-	OrderByNumDesc
-)
-
-func ( self * Article ) GetCates( orderByNum orderByNum )  []map[string]string {
-	var orderByString = ""
-	if orderByNum == OrderByNumAsc {
-		orderByString = " order by num asc"
-	} else if orderByNum == OrderByNumDesc {
-		orderByString = " order by num desc"
-	}
-	sql := "select id, name, num, add_date from article_category where pid = 0  " + orderByString
-	result := DbHelper.GetDataBase().Query(sql)
-	return result
-}
-
-func ( self * Article ) GetCateName( cateId int ) string {
-	sql := "select name from article_category where id = " + strconv.Itoa( cateId )
-	result := DbHelper.GetDataBase().GetSingle(sql)
-	if result == "" {
-		return "所有文章"
-	}
-	return result
-}
-
-func (self *Article) AddCate( name string, orderNum int ) error  {
-	var countSql = "select count(*) from article_category where name = ?"
-	var count,_ = strconv.Atoi( DbHelper.GetDataBase().GetSingle(countSql,name) )
-	if count > 0 {
-		return errors.New("类别名称已经存在")
-	}
-	var insertSql = "insert into  article_category(name,num,pid,add_date) values(?,?,0,CURRENT_TIMESTAMP())"
-	DbHelper.GetDataBase().Query(insertSql,name,orderNum)
-	return nil
-}
-
-func  (self *Article) EditCate( id int, name string, orderNum int )  {
-	var sql = "update article_category set name = ? , num = ? where id = ?"
-	DbHelper.GetDataBase().ExecuteSql(sql,name,orderNum,id)
-}
-
-func  (self *Article) DelCate( id int )  {
-	var sql = "delete from article_category where id = ?"
-	DbHelper.GetDataBase().Query(sql,id)
-}
-
-func (self *Article) GetCate(id int) map[string]string  {
-	var sql = "select * from article_category where id = ?"
-	var result = DbHelper.GetDataBase().Query(sql,id)
-	if len(result) > 0 {
-		return result[0]
-	} else {
-		return nil
-	}
-}
