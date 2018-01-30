@@ -9,23 +9,6 @@ import (
 	"strings"
 )
 
-//func ExecLexeme()  {
-//	var sql = "select id, title, content from article"
-//	var result = DbHelper.GetDataBase().Query(sql)
-//	for _, item := range result {
-//		var id,_ = strconv.Atoi( item ["id"] )
-//		var title = item["title"]
-//		var content = item["content"]
-//
-//		common.LexemeDelete(id,common.ARTICLE_LEXEME_TYPE)
-//		common.LexemeCreate(id,common.ARTICLE_LEXEME_TYPE,title)
-//		common.LexemeCreate(id,common.ARTICLE_LEXEME_TYPE,content)
-//
-//		fmt.Println( "执行完毕 - " + title)
-//	}
-//	fmt.Println("执行结束")
-//}
-
 type Article struct {}
 
 func (self *Article) AddArticle(title string, cate string, author string, content string) int {
@@ -50,6 +33,18 @@ func (self *Article) AddArticle(title string, cate string, author string, conten
 func (self *Article) EditArticle(articleId int , title string, cate string, author string, content string)  {
 	var sql = "update article set title = ?, author = ?, content = ? where id = ?"
 	DbHelper.GetDataBase().ExecuteSql(sql,title,author,content,articleId)
+	var delSql = "delete from article_categories where article_id = ?"
+	DbHelper.GetDataBase().ExecuteSql(delSql,articleId)
+	go func() {
+		var cateIds = strings.Split(cate,",")
+		for _, cateId := range cateIds {
+			var addCateSql = "insert into article_categories(article_id,cate_id) values (?,?)"
+			DbHelper.GetDataBase().ExecuteSql(addCateSql,articleId,cateId)
+		}
+	}()
+}
+
+func (self *Article) SetArticleCate(articleId int, cate string)  {
 	var delSql = "delete from article_categories where article_id = ?"
 	DbHelper.GetDataBase().ExecuteSql(delSql,articleId)
 	go func() {
@@ -129,7 +124,8 @@ func (self *Article) getLevel0CateIDs( articleId int ) []int {
 
 func (self *Article) GetAll() []map[string]string {
 	var articleCateSql = `select a.article_id,
-									group_concat(  b.name ) as cate_name
+									group_concat(  b.name ) as cate_name,
+									group_concat(b.id) as cate_id
 							from article_categories as  a
 							LEFT JOIN  article_category as b
 							on a.cate_id = b.id
@@ -153,6 +149,7 @@ func (self *Article) GetAll() []map[string]string {
 		for _, cateItem := range articleCateList {
 			if articleItem["id"] == cateItem["article_id"] {
 				articleList[index]["cates"] = cateItem["cate_name"]
+				articleList[index]["cate_ids"] = cateItem["cate_id"]
 			}
 		}
 	}

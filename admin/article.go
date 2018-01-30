@@ -51,6 +51,14 @@ func CateList(response http.ResponseWriter, request *http.Request) {
 	response.Write(json)
 }
 
+func SetArticleCate(response http.ResponseWriter, request *http.Request) {
+	var articleId = request.FormValue("id")
+	var cate = request.FormValue("cate")
+	var iArticleId ,_ = strconv.Atoi(articleId)
+	articleModel.SetArticleCate(iArticleId, cate)
+	response.Write(JsonData(0,"设置成功",nil))
+}
+
 func ArticleList(response http.ResponseWriter, request *http.Request) {
 	articleList := articleModel.GetAll()
 	json,_ := json.Marshal(articleList)
