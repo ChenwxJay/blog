@@ -16,20 +16,20 @@ type ArticleView struct{
 
 func ( self * ArticleView ) ServeHTTP( response http.ResponseWriter, request *http.Request ) {
 	id, error := strconv.Atoi( request.FormValue("id") )
-	if( error != nil ) {
-		response.Write([]byte("参数错误"));
-		return ;
+	if error != nil {
+		response.Write([]byte("参数错误"))
+		return 
 	}
 	var pageContentOut = make(chan string)
 	go func() {
-		var pageContent = common.GetFileContent("html/article_view.html");
+		var pageContent = common.GetFileContent("html/article_view.html")
 		pageContentOut <- pageContent
 		close(pageContentOut)
 	}()
 	var articleDataOut = make( chan map[string]string )
 	go func() {
-		var article = model.Article{};
-		var data = article.GetArticle(id);
+		var article = model.Article{}
+		var data = article.GetArticle(id)
 		articleDataOut <- data
 		close(articleDataOut)
 	}()
@@ -37,23 +37,25 @@ func ( self * ArticleView ) ServeHTTP( response http.ResponseWriter, request *ht
 	var pageContent = <- pageContentOut
 	var data = <- articleDataOut
 
-	pageContent = strings.Replace(pageContent, "${title}",data["title"],-1);
-	pageContent = strings.Replace(pageContent, "${content}",data["content"],-1);
-	pageContent = code(pageContent);
-	response.Write([]byte(pageContent));
+	pageContent = strings.Replace(pageContent, "${title}",data["title"],-1)
+	pageContent = strings.Replace(pageContent, "${content}",data["content"],-1)
+	pageContent = code(pageContent)
+	response.Write([]byte(pageContent))
 }
 
 func code( content string ) string {
-	regex := regexp.MustCompile(`<pre[^>]*>([\s\S]+?)<\/pre>`)
+	var regex = regexp.MustCompile(`<pre[^>]*>([\s\S]+?)<\/pre>`)
 	return regex.ReplaceAllStringFunc(content, func(str string) string {
-		start := regexp.MustCompile(`<pre[^>]*>`);
-		end := regexp.MustCompile(`<\/pre>`);
+		var replaceHtmlRegex = regexp.MustCompile(`<\/?(p|span)(>|[\s|\/][^>]*>)`)
+		str = replaceHtmlRegex.ReplaceAllString(str,"")
+		start := regexp.MustCompile(`<pre[^>]*>`)
+		end := regexp.MustCompile(`<\/pre>`)
 		str = start.ReplaceAllStringFunc(str, func(str string) string  {
-			return str + "<code>";
-		});
+			return str + "<code>"
+		})
 		str = end.ReplaceAllStringFunc(str, func(str string) string  {
-			return "</code>" + str;
-		});
-		return str;
-	});
+			return "</code>" + str
+		})
+		return str
+	})
 }
