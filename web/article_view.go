@@ -40,6 +40,7 @@ func ( self * ArticleView ) ServeHTTP( response http.ResponseWriter, request *ht
 	pageContent = strings.Replace(pageContent, "${title}",data["title"],-1)
 	pageContent = strings.Replace(pageContent, "${content}",data["content"],-1)
 	pageContent = code(pageContent)
+	pageContent = setClientResourceVersion(pageContent)
 	response.Write([]byte(pageContent))
 }
 

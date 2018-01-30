@@ -10,6 +10,7 @@ type configs struct  {
 	ConnectingString string
 	LexemeUrl string
 	LexemeKey string
+	ClientResourceVersion string
 }
 
 var configData *configs

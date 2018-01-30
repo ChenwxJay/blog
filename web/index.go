@@ -19,6 +19,7 @@ func ( self * Index ) ServeHTTP( response http.ResponseWriter, request *http.Req
 	pageContent := common.GetFileContent("html/default.html")
 	pageContent = attachCateHtml( pageContent )
 	pageContent = attachArticleList(pageContent,request)
+	pageContent = setClientResourceVersion(pageContent)
 	response.Write([]byte(pageContent))
 }
 

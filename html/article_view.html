@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>${title} - 带你撸出一手好代码</title>
-    <link type="text/css" rel="stylesheet" href="/html/style/article_view.css?v=20180121" />
+    <link type="text/css" rel="stylesheet" href="/html/style/article_view.css?v=${client_resource_version}" />
 </head>
 <body>
 <div class="main">
@@ -22,9 +22,9 @@
     </div>
 </div>
 </body>
-<script src="/html/script/jquery-3.1.1.min.js"></script>
-<link rel="stylesheet" href="/html/script/vs2015.css">
-<script src="/html/script/highlight.pack.js"></script>
+<script src="/html/script/jquery-3.1.1.min.js?v=${client_resource_version}"></script>
+<link rel="stylesheet" href="/html/script/vs2015.css?v=${client_resource_version}">
+<script src="/html/script/highlight.pack.js?v=${client_resource_version}"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 <script type="text/javascript">
 $("img").bind("click", function(){
