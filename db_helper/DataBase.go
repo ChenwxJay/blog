@@ -69,7 +69,7 @@ func (self *dataBase) ExecuteSql(sql string,arg...interface{}) {
 		return
 	}
 	result, err := db.Query(sql,arg...)
-	if ( err != nil ) {
+	if err != nil {
 		logger.OpenFileLogger().Println(err)
 		logger.CloseFileLogger()
 		return

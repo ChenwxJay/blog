@@ -4,12 +4,13 @@ import (
 	"../model"
 	"strings"
 	"../common/config_manger"
+	"net/http"
 )
 
 var articleModel = model.Article{}
 var articleCateModel = model.ArticleCate{}
+var articleVisitInfoModel = model.ArticleVisitInfo{}
 
-const CLIENT_RESOURCE_VERSION = "20180130"
 
 func setClientResourceVersion( pageContent string ) string {
 	var version = config_manager.GetConfig().ClientResourceVersion
@@ -17,4 +18,14 @@ func setClientResourceVersion( pageContent string ) string {
 		version = "19871106"
 	}
 	return strings.Replace(pageContent,`${client_resource_version}`, version,-1)
+}
+
+func getIpAddr(  request *http.Request  ) string {
+	var ipAndPort = request.RemoteAddr
+	var items = strings.Split(ipAndPort,":")
+	if len(items) == 2 {
+		return items[0]
+	} else {
+		return "localhost"
+	}
 }

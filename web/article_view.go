@@ -42,6 +42,10 @@ func ( self * ArticleView ) ServeHTTP( response http.ResponseWriter, request *ht
 	pageContent = code(pageContent)
 	pageContent = setClientResourceVersion(pageContent)
 	response.Write([]byte(pageContent))
+
+	go func() {
+		articleVisitInfoModel.Add(id, getIpAddr(request))
+	}()
 }
 
 func code( content string ) string {

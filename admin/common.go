@@ -22,5 +22,5 @@ func JsonData( code int , message string , data interface{} ) []byte {
 }
 
 func LoginErrorResponse() []byte {
-	return  JsonData( 0, "登录失效", nil );
+	return  JsonData( 0, "登录失效", nil )
 }
