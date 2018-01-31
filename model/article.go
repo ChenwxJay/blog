@@ -130,7 +130,7 @@ func (self *Article) GetAll() []map[string]string {
 							LEFT JOIN  article_category as b
 							on a.cate_id = b.id
 							GROUP BY article_id`
-	var articleSql = "select id, title, author ,add_time from article order by id desc"
+	var articleSql = "select id, title, author ,add_time, (select count(1) from visit_info where article_id = article.id) as visit_count from article order by id desc"
 	var articleCateOut = make(chan []map[string]string)
 	var articleListOut = make(chan []map[string]string)
 	go func() {
