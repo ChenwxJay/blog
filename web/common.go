@@ -21,6 +21,14 @@ func setClientResourceVersion( pageContent string ) string {
 }
 
 func getIpAddr(  request *http.Request  ) string {
+	var xForwardedFor = request.Header.Get("x-forwarded-for")
+	var xRealIp = request.Header.Get("X-Real-IP")
+	if xForwardedFor != "" {
+		return xForwardedFor
+	}
+	if xRealIp != "" {
+		return xRealIp
+	}
 	var ipAndPort = request.RemoteAddr
 	var items = strings.Split(ipAndPort,":")
 	if len(items) == 2 {
