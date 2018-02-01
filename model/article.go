@@ -11,6 +11,11 @@ import (
 
 type Article struct {}
 
+func (self *Article) Disabled( articleId int ) {
+	var sql = "update article set disabled = if(disabled = 1, 0, 1) where id = ?"
+	DbHelper.GetDataBase().ExecuteSql(sql, articleId)
+}
+
 func (self *Article) AddArticle(title string, cate string, author string, content string) int {
 	var sql = "insert into article (title, author, content, show_time, add_time, read_count, is_commend ) values (?,?,?,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP(),0,0)"
 	DbHelper.GetDataBase().ExecuteSql(sql,title,author,content)
@@ -61,11 +66,19 @@ func (self *Article) DelArticle( id int)  {
 	DbHelper.GetDataBase().ExecuteSql(sql,id)
 }
 
+func (self *Article) GetEnableArticle( id int) (map[string]string) {
+	return self.GetArticleDataItem(id,"v_enabled_article")
+}
+
 func (self *Article) GetArticle( id int) (map[string]string)  {
+	return self.GetArticleDataItem(id,"article")
+}
+
+func (self *Article) GetArticleDataItem( id int, desc string ) (map[string]string)  {
 	var db = DbHelper.GetDataBase()
 	var articleOut = make(chan map[string]string)
 	go func() {
-		var sql = "select * from article where id = " + strconv.Itoa(id)
+		var sql = "select *, date(add_time) as add_date from "+ desc +" where id = " + strconv.Itoa(id)
 		var result = db.Query(sql)
 		if len(result) > 0 {
 			articleOut <- result[0]
@@ -79,7 +92,6 @@ func (self *Article) GetArticle( id int) (map[string]string)  {
 		var result = "0"
 		if len(topCateIDs) > 0  {
 			result = strings.Join(common.IntArray2StringArray(topCateIDs),",")
-			//result = strconv.Itoa( topCateIDs[0] )
 		}
 		topCateIDsOut <- result
 		close(topCateIDsOut)
@@ -110,7 +122,6 @@ func (self *Article) getLevel0CateId( cateId int ) int {
 	}
 }
 
-
 func (self *Article) getLevel0CateIDs( articleId int ) []int {
 	var sql = "select cate_id from article_categories where article_id = " + strconv.Itoa( articleId )
 	var cateIDs = DbHelper.GetDataBase().Query(sql)
@@ -122,6 +133,11 @@ func (self *Article) getLevel0CateIDs( articleId int ) []int {
 	return topCateIDs
 }
 
+func (self *Article) GetAllEnabled() []map[string]string  {
+	var articleSql = "select id, title, author ,add_time, disabled from v_enabled_article order by id desc"
+	return DbHelper.GetDataBase().Query(articleSql)
+}
+
 func (self *Article) GetAll() []map[string]string {
 	var articleCateSql = `select a.article_id,
 									group_concat(  b.name ) as cate_name,
@@ -130,7 +146,7 @@ func (self *Article) GetAll() []map[string]string {
 							LEFT JOIN  article_category as b
 							on a.cate_id = b.id
 							GROUP BY article_id`
-	var articleSql = "select id, title, author ,add_time, (select count(1) from visit_info where article_id = article.id) as visit_count from article order by id desc"
+	var articleSql = "select id, title, author ,add_time, disabled, (select count(1) from visit_info where article_id = article.id) as visit_count from article order by id desc"
 	var articleCateOut = make(chan []map[string]string)
 	var articleListOut = make(chan []map[string]string)
 	go func() {
@@ -184,7 +200,7 @@ func (self *Article) sortResult( dataList []map[string]string, idListRefable str
 	return result
 }
 
-func (self *Article) GetArticleList( pager common.Pager, cateId int, kw string) ([]map[string]string, int)  {
+func (self *Article) GetEnableArticleList( pager common.Pager, cateId int, kw string) ([]map[string]string, int)  {
 	var start, _ = pager.GetRange()
 	var pageSize = pager.GetPageSize()
 	kw = common.Trim(kw)
@@ -209,8 +225,8 @@ func (self *Article) GetArticleList( pager common.Pager, cateId int, kw string) 
 			where += " and 1 = 2 "
 		}
 	}
-	var countSql = "select count(1) from article where " + where 
-	var sql = "select id , title from article where "+ where +  orderBy + " limit " + limit
+	var countSql = "select count(1) from v_enabled_article where " + where
+	var sql = "select id , title from v_enabled_article where "+ where +  orderBy + " limit " + limit
 	dataCount,_:= strconv.Atoi( DbHelper.GetDataBase().GetSingle(countSql,args...) )
 	dataList := DbHelper.GetDataBase().Query(sql,args...)
 	dataList = self.sortResult(dataList, ids)

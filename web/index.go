@@ -36,7 +36,7 @@ func getQuery(  request *http.Request) (int, string)  {
 func attachArticleList( pageHtml string,   request *http.Request) string  {
 	pager := common.CreatePager(request,common.INDEX_PAGE_SIZE,common.NUMERIC_BUTTON_COUNT)
 	cateId, kw := getQuery(request)
-	dataList, dataCount := articleModel.GetArticleList( pager, cateId, kw)
+	dataList, dataCount := articleModel.GetEnableArticleList( pager, cateId, kw)
 	pager.SetDataCount(dataCount)
 	var listHtml = ""
 	for _, item := range dataList {
@@ -53,7 +53,7 @@ func attachArticleList( pageHtml string,   request *http.Request) string  {
 
 func attachCateHtml( pageHtml string )  string {
 	cates := articleCateModel.GetCates( model.OrderByNumAsc)
-	var html string = ""
+	var html = ""
 	for _, item := range cates {
 		html += `<li>
                			<a link-id=`+ item["id"] +` href="index?cate_id=`+ item["id"] +`" class="small">`+ item["name"] +`</a>

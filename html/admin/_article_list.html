@@ -19,6 +19,8 @@
         .cate-selector label{ width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .cate-selector input[type=checkbox],.cate-selector label{float: left;}
         .show-cate-selector{ cursor: pointer;}
+
+        .article-disabled-state{ cursor: pointer;}
     </style>
 </head>
 
@@ -59,6 +61,7 @@
                             <th>来源</th>
                             <th>时间</th>
                             <th>阅读量</th>
+                            <th>状态</th>
                             <th>操作</th>
                         </tr>
                         </thead>
@@ -196,6 +199,9 @@
                             <td>${item.author}</td>
                             <td class="center">${item.add_time}</td>
                             <td>${item.visit_count}</td>
+                            <td>
+                                ${getArticleDisabledStateHtml(item.id,item.disabled)}
+                            </td>
                             <td class="center">
                                 <a href="javascript:parent.newTab('_article_form.html?id=${item.id}','编辑文章')">编辑</a>
                                 <a href="javascript:;" onclick="del(${item.id}, this)">删除</a>
@@ -207,6 +213,23 @@
         }
         $.ajax( ajaxSetting );
     }();
+
+    function getArticleDisabledStateHtml( articleId, disabled ) {
+        let html =  "<span class='article-disabled-state' onclick='enabledArticleState(this, "+ articleId +","+ disabled +")'  name='article_state' article_id='"+ articleId +"' disabled='"+ disabled +"'";
+        if(disabled == 1) {
+            html += " style='color:red;'>未发布</span>";
+        } else {
+            html += "'>已发布</span>"
+        }
+        return html;
+    }
+
+    function enabledArticleState( btnElement, articleId, disabled ) {
+        let newState = disabled ^ 1
+        $.get("/admin/article_disabled?id=" + articleId, function(){
+            $(btnElement).parent().html(getArticleDisabledStateHtml(articleId, newState));
+        });
+    }
 
     function del(id, target) {
         parent.layer.confirm('确定要删除此项吗？', {

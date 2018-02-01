@@ -8,6 +8,7 @@ import (
 	"../model"
 )
 
+
 func CateItem(response http.ResponseWriter, request *http.Request) {
 	var id = request.FormValue("id")
 	var iid,_ = strconv.Atoi(id)
@@ -130,4 +131,11 @@ func ArticleView(response http.ResponseWriter, request *http.Request)   {
 	var articleInfo = articleModel.GetArticle(id)
 	var json,_ = json.Marshal(articleInfo)
 	response.Write(json)
+}
+
+func ArticleDisabled(response http.ResponseWriter, request *http.Request) {
+	var articleId = request.FormValue("id")
+	var iArticleId ,_ = strconv.Atoi(articleId)
+	articleModel.Disabled(iArticleId)
+	response.Write(JsonData(0,"操作成功",nil))
 }

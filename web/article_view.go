@@ -37,8 +37,16 @@ func ( self * ArticleView ) ServeHTTP( response http.ResponseWriter, request *ht
 	var pageContent = <- pageContentOut
 	var data = <- articleDataOut
 
+	if ( len(data) == 0 ) || ( data["disabled"] == "1" && !loginModel.IsLogin(request) ) {
+		var notFoundPageContent = common.GetFileContent("html/404.html")
+		response.WriteHeader(404)
+		response.Write([]byte(notFoundPageContent))
+		return
+	}
+
 	pageContent = strings.Replace(pageContent, "${title}",data["title"],-1)
 	pageContent = strings.Replace(pageContent, "${content}",data["content"],-1)
+	pageContent = strings.Replace(pageContent,"${time}",data["add_date"],-1)
 	pageContent = code(pageContent)
 	pageContent = setClientResourceVersion(pageContent)
 	response.Write([]byte(pageContent))

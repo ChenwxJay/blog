@@ -14,6 +14,8 @@ func main() {
 	config_manager.CheckConfig()
 
 	//前端
+	http.HandleFunc("/put_url_to_baidu", web.PutUrlToBaidu )
+
 	http.Handle("/log/", http.FileServer(http.Dir(".")))
 	http.Handle("/html/", http.FileServer(http.Dir(".")))
 	http.Handle("/upload/", http.FileServer(http.Dir(".")))
@@ -32,6 +34,7 @@ func main() {
 	http.HandleFunc("/admin/article_cates", admin.ArticleCates)
 	http.HandleFunc("/admin/article_view", admin.ArticleView)
 	http.HandleFunc("/admin/article_edit", admin.ArticleEdit)
+	http.HandleFunc("/admin/article_disabled", admin.ArticleDisabled)
 	http.HandleFunc("/admin/set_article_cate", admin.SetArticleCate)
 	http.HandleFunc("/admin/cate_add", admin.CateAdd)
 	http.HandleFunc("/admin/cate_edit", admin.CateEdit)

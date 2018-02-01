@@ -9,5 +9,6 @@ body{background-color: #fbecc5;}
 .main>.title{ font-size: 32px; font-weight: bold; float: left; margin-top: 20px; width: 100%; text-indent: 20px; margin-bottom: 20px;}
 .main>.content{ width: 920px; margin: 0 auto;}
 
-.main>.foot{ padding-left: 50px; margin-top: 50px;}
+.main>.time{ text-align: right; width: 920px; margin: 0 auto; color: gray; font-size: 12px;}
+.main>.foot{ padding-left: 50px; margin-top: 50px; padding-bottom: 20px;}
 .main>.foot h1{font-size: 26px;}
