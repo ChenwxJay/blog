@@ -6,8 +6,13 @@ body{background-color: #fbecc5;}
 .main>.header{ background-color: #cc6611; padding: 30px 0 30px 30px; }
 .main>.header span.title{    font-size: 60px; color: white; font-weight: normal; cursor: pointer;}
 .main>.title{ font-size: 32px; font-weight: bold;  margin-top: 20px;  margin-bottom: 20px;}
-.main>.content{ margin: 0 auto;}
+.main>.content{ margin: 0 auto; }
 
-.main>.time{ text-align: right; margin: 0 auto; color: gray; font-size: 12px;}
+.main>.time,.main>.author{ line-height: 1.5em; text-align: left; margin: 0 auto; color: gray; font-size: 12px; padding-left:calc(100% - 120px);white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 .main>.foot{  margin-top: 50px; padding-bottom: 20px;}
 .main>.foot h1{font-size: 26px;}
+
+.main>.title ,
+.main>.content,
+.main>.foot{ padding: 0 10px;}
