@@ -138,7 +138,8 @@ func (self *Article) GetAllEnabled() []map[string]string  {
 	return DbHelper.GetDataBase().Query(articleSql)
 }
 
-func (self *Article) GetAll() []map[string]string {
+func (self *Article) GetAll(cateId string,  keyword string,disabled string) []map[string]string {
+	var where = self.getWhere(cateId,keyword,disabled)
 	var articleCateSql = `select a.article_id,
 									group_concat(  b.name ) as cate_name,
 									group_concat(b.id) as cate_id
@@ -146,7 +147,9 @@ func (self *Article) GetAll() []map[string]string {
 							LEFT JOIN  article_category as b
 							on a.cate_id = b.id
 							GROUP BY article_id`
-	var articleSql = "select id, title, author ,add_time, disabled, (select count(1) from visit_info where article_id = article.id) as visit_count from article order by id desc"
+	var articleSql = `select id, title, author ,add_time, disabled, 
+							(select count(1) from visit_info where article_id = article.id) as visit_count 
+							from article where ` + where + ` order by id desc`
 	var articleCateOut = make(chan []map[string]string)
 	var articleListOut = make(chan []map[string]string)
 	go func() {
@@ -200,31 +203,59 @@ func (self *Article) sortResult( dataList []map[string]string, idListRefable str
 	return result
 }
 
-func (self *Article) GetEnableArticleList( pager common.Pager, cateId int, kw string) ([]map[string]string, int)  {
-	var start, _ = pager.GetRange()
-	var pageSize = pager.GetPageSize()
-	kw = common.Trim(kw)
-	var limit = strconv.Itoa(start) + "," + strconv.Itoa(pageSize)
-	var where = " 1=1"
-	var orderBy = " order by id desc "
-	var ids = ""
-	args := make([]interface{},0)
-	var cateIdString = strconv.Itoa( cateId )
-	if cateId != 0 {
+func (self *Article) getWhere(cateIdString string, kw string, disabled string) string  {
+	var where = " 1=1 "
+	if cateIdString != "" {
 		where += " and id in (select article_id from article_categories where cate_id in (select DISTINCT(id) from article_category where pid = "+ cateIdString +"  or id = "+ cateIdString +"))"
 	}
+
 	if kw != "" {
+		var ids = ""
 		var lexemeResult = common.LexemeFind( kw, common.ARTICLE_LEXEME_TYPE, 1, math.MaxInt32 )
 		if lexemeResult.DataCount > 0  {
 			ids = self.lexemeInCondition(lexemeResult.DataList)
 			if ids != "" {
-				where += " and id in (" + ids + ")"
-				orderBy = ""
+				where += " and id in (" + ids + ") "
 			}
 		} else {
 			where += " and 1 = 2 "
 		}
 	}
+	if disabled != "" {
+		var _ , err = strconv.Atoi(disabled)
+		if err == nil {
+			where += " and disabled = " + disabled
+		}
+	}
+	return where
+}
+
+func (self *Article) GetEnableArticleList( pager common.Pager, cateId int, kw string) ([]map[string]string, int)  {
+	var start, _ = pager.GetRange()
+	var pageSize = pager.GetPageSize()
+	kw = common.Trim(kw)
+	var limit = strconv.Itoa(start) + "," + strconv.Itoa(pageSize)
+	//var where = " 1=1"
+	var orderBy = " order by id desc "
+	var ids = ""
+	args := make([]interface{},0)
+	var cateIdString = strconv.Itoa( cateId )
+	var where = self.getWhere(cateIdString,kw,"")
+	//if cateId != 0 {
+	//	where += " and id in (select article_id from article_categories where cate_id in (select DISTINCT(id) from article_category where pid = "+ cateIdString +"  or id = "+ cateIdString +"))"
+	//}
+	//if kw != "" {
+	//	var lexemeResult = common.LexemeFind( kw, common.ARTICLE_LEXEME_TYPE, 1, math.MaxInt32 )
+	//	if lexemeResult.DataCount > 0  {
+	//		ids = self.lexemeInCondition(lexemeResult.DataList)
+	//		if ids != "" {
+	//			where += " and id in (" + ids + ")"
+	//			orderBy = ""
+	//		}
+	//	} else {
+	//		where += " and 1 = 2 "
+	//	}
+	//}
 	var countSql = "select count(1) from v_enabled_article where " + where
 	var sql = "select id , title from v_enabled_article where "+ where +  orderBy + " limit " + limit
 	dataCount,_:= strconv.Atoi( DbHelper.GetDataBase().GetSingle(countSql,args...) )

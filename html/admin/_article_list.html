@@ -13,14 +13,44 @@
     <link href="css/style.min862f.css?v=4.1.0" rel="stylesheet">
 
     <style type="text/css">
-        #data_list tr:hover{background-color: #e6e6e6;}
-        .cate-selector{ display: none; position: absolute; width: 330px;  background-color: #FFFFFF; padding: 10px;-moz-box-shadow:0px 1px 9px #333333; -webkit-box-shadow:0px 1px 9px #333333; box-shadow:0px 1px 9px #333333;}
-        .cate-selector div{ width: 100px; display: inline-block; }
-        .cate-selector label{ width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .cate-selector input[type=checkbox],.cate-selector label{float: left;}
-        .show-cate-selector{ cursor: pointer;}
+        #data_list tr:hover {
+            background-color: #e6e6e6;
+        }
 
-        .article-disabled-state{ cursor: pointer;}
+        .cate-selector {
+            display: none;
+            position: absolute;
+            width: 330px;
+            background-color: #FFFFFF;
+            padding: 10px;
+            -moz-box-shadow: 0px 1px 9px #333333;
+            -webkit-box-shadow: 0px 1px 9px #333333;
+            box-shadow: 0px 1px 9px #333333;
+        }
+
+        .cate-selector div {
+            width: 100px;
+            display: inline-block;
+        }
+
+        .cate-selector label {
+            width: 80px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cate-selector input[type=checkbox], .cate-selector label {
+            float: left;
+        }
+
+        .show-cate-selector {
+            cursor: pointer;
+        }
+
+        .article-disabled-state {
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -28,7 +58,65 @@
 <div class="wrapper wrapper-content animated fadeInRight">
     <div class="row">
         <div class="col-sm-12">
-            <div class="ibox float-e-margins">
+            <div class="ibox float-e-margins" style="margin-bottom: 15px;" >
+                <div class="ibox-title">
+                    <h5>筛选
+                        <small></small>
+                    </h5>
+                    <div class="ibox-tools"></div>
+                </div>
+                <div class="ibox-content"  style="padding-bottom: 1px;">
+                    <form onsubmit="return false;" class="form-horizontal">
+                        <div class="form-group"><label class="col-sm-1 control-label">
+                            类别
+                        </label>
+                            <div class="col-sm-2">
+                                <select class="form-control" id="cate_id">
+                                    <option value="">选择类别</option>
+                                </select>
+                            </div>
+                            <label class="col-sm-1 control-label">
+                                状态
+                            </label>
+                            <div class="col-sm-2">
+                                <select class="form-control" id="disabled">
+                                    <option value="">选择状态</option>
+                                    <option value="0">已发布</option>
+                                    <option value="1">未发布</option>
+                                </select>
+                            </div>
+                            <label class="col-sm-1 control-label">
+                                关键字
+                            </label>
+                            <div class="col-sm-2">
+                                <input id="keyword" type="text" class="form-control" placeholder="">
+                            </div>
+                            <label class="col-sm-1 control-label">
+
+                            </label>
+                            <div class="col-sm-2">
+
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+
+                        <div class="form-group"  style="margin-bottom: 1px;">
+                            <div style="text-align: right;">
+                                <button class="btn btn-primary" id="search_btn">筛选</button>
+                                &nbsp;
+                                <button type="button" class="btn btn-default" id="reset_btn">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins" >
                 <div class="ibox-title">
                     <h5>文章列表
                     </h5>
@@ -92,26 +180,66 @@
 <script src="/html/script/common.js"></script>
 
 <script>
-    (function(){
-        let cateSelector =  $("#cate-selector");
-        let currArticleId ;
+    function initSearchFormCateField(response) {
+        let data = eval("("+ response +")");
+        let html = data.map( item =>{
+            return `<option value="${item.id}">${item.name}</option>`;
+        }).join("");
+        html = ` <option value="">选择类别</option>` + html;
+        $("#cate_id").html( html );
+        fillSearchForm();
+    };
+
+    function fillSearchForm() {
+        let queryString = chhblog.queryString();
+        let cateId = queryString.get("cate_id");
+        let disabled = queryString.get("disabled");
+        let keyword = queryString.get("keyword");
+        $("#cate_id").val(cateId);
+        $("#disabled").val(disabled);
+        $("#keyword").val(keyword);
+    }
+
+    void function initSearch() {
+        let searchBtn = $("#search_btn");
+        let resetBtn = $("#reset_btn");
+        searchBtn.bind("click",function(){
+            let cateId = $("#cate_id").val();
+            let disabled = $("#disabled").val();
+            let keyword = $.trim($("#keyword").val());
+            let query = {};
+            query["cate_id"] = cateId;
+            query["disabled"] = disabled;
+            query["keyword"] = keyword;
+            let url = `/html/admin/_article_list.html?` + $.param(query);
+            window.location.href = url;
+        });
+        resetBtn.bind("click", function(){
+            window.location.href = "/html/admin/_article_list.html"
+        });
+    }();
+
+
+    (function () {
+        let cateSelector = $("#cate-selector");
+        let currArticleId;
         let cateData;
 
-        function getCateNamesByCateIDs( cateIDs ) {
-            return cateIDs.map( cateID => cateData.filter(cateItem => cateItem.id == cateID)[0].name).join(",");
+        function getCateNamesByCateIDs(cateIDs) {
+            return cateIDs.map(cateID => cateData.filter(cateItem => cateItem.id == cateID)[0].name).join(",");
         }
 
-        $.get("/admin/article_cates",( response )=>{
-            let data = eval("("+ response +")");
+        $.get("/admin/article_cates", (response) => {
+            let data = eval("(" + response + ")");
             cateData = data;
-            let html = data.map( item =>{
+            let html = data.map(item => {
                 return `<div><input type="checkbox" value="${item.id}" id="cate_${item.id}" name="cate"/> <label title="${item.name}" style="font-weight: normal;" for="cate_${item.id}">${item.name}</label></div>`;
             }).join("");
             html += "<input type='button' value='确定' />"
-            cateSelector.html( html );
-            cateSelector.find("input[type=button]").bind("click", function(){
+            cateSelector.html(html);
+            cateSelector.find("input[type=button]").bind("click", function () {
                 let cateIDS = getSelectCateIDs();
-                if( cateIDS.length == 0) {
+                if (cateIDS.length == 0) {
                     return;
                 }
                 let ajaxSetting = {};
@@ -119,7 +247,7 @@
                 ajaxSetting.type = 'GET';
                 ajaxSetting.dataType = 'JSON';
                 ajaxSetting.data = {id: currArticleId, cate: cateIDS.join(",")}
-                ajaxSetting.success = function ( response ) {
+                ajaxSetting.success = function (response) {
                     if (response.Code == 0) {
                         hideCateSelector();
                         $("#article_cate_" + currArticleId).html(getCateNamesByCateIDs(cateIDS)).attr("cate_ids", cateIDS.join(","));
@@ -129,29 +257,31 @@
                 }
                 $.ajax(ajaxSetting);
             });
+
+            initSearchFormCateField(response);
         });
 
         function getSelectCateIDs() {
             let result = [];
-            cateSelector.find("input[type=checkbox]").each((index,item) =>{
-               if( item.checked ) {
-                   result.push(item.value);
-               }
+            cateSelector.find("input[type=checkbox]").each((index, item) => {
+                if (item.checked) {
+                    result.push(item.value);
+                }
             });
             return result;
         }
 
         void function initCateSelectorViewState() {
-            $(document).bind("click", function(e){
-                if(cateSelector.get(0).contains(e.target)) {
+            $(document).bind("click", function (e) {
+                if (cateSelector.get(0).contains(e.target)) {
                     return;
                 }
                 let btns = $(".show-cate-selector");
                 let eles = chhblog.jquery2HtmlElements(btns);
-                if( eles.some(item => item.contains(e.target))) {
+                if (eles.some(item => item.contains(e.target))) {
                     return;
                 }
-               hideCateSelector();
+                hideCateSelector();
             });
         }();
 
@@ -159,7 +289,7 @@
             cateSelector.hide();
         }
 
-        function showCateSelector( target, articleId ) {
+        function showCateSelector(target, articleId) {
             currArticleId = articleId;
             let jqueryTarget = $(target);
             let offset = jqueryTarget.offset();
@@ -167,9 +297,9 @@
             cateSelector.css(offset).show();
             cateSelector.find("input[type='checkbox']").removeAttr("checked");
             let cateIDs = target.getAttribute("cate_ids");
-            cateIDs.split(",").forEach(val=>{
-               let checkbox =  cateSelector.find('input[type=checkbox][value='+ val +']');
-               checkbox.get(0).checked = true;
+            cateIDs.split(",").forEach(val => {
+                let checkbox = cateSelector.find('input[type=checkbox][value=' + val + ']');
+                checkbox.get(0).checked = true;
             });
         }
 
@@ -177,14 +307,24 @@
     })();
 
 
-    void function load() {
+    function load( cateId, disabled, keyword ) {
+        let url = "/admin/article_list?1=1";
+        if( cateId !== undefined && cateId !== "" ) {
+            url += "&cate_id=" + cateId;
+        }
+        if(disabled !== undefined && disabled !== "" ) {
+            url += "&disabled=" + disabled;
+        }
+        if(keyword !== undefined && keyword !== "" ) {
+            url += "&keyword=" + keyword;
+        }
         let ajaxSetting = {};
-        ajaxSetting.url = "/admin/article_list";
+        ajaxSetting.url = url;
         ajaxSetting.type = 'GET';
         ajaxSetting.dataType = 'JSON';
-        ajaxSetting.success = function ( response ) {
+        ajaxSetting.success = function (response) {
             let html = "";
-            for(var i = 0; i < response.length; i++) {
+            for (var i = 0; i < response.length; i++) {
                 let item = response[i];
                 html += `<tr class="gradeA">
                             <td>${item.id}</td>
@@ -200,7 +340,7 @@
                             <td class="center">${item.add_time}</td>
                             <td>${item.visit_count}</td>
                             <td>
-                                ${getArticleDisabledStateHtml(item.id,item.disabled)}
+                                ${getArticleDisabledStateHtml(item.id, item.disabled)}
                             </td>
                             <td class="center">
                                 <a href="javascript:parent.newTab('_article_form.html?id=${item.id}','编辑文章')">编辑</a>
@@ -208,15 +348,15 @@
                             </td>
                         </tr>`;
             }
-            $("#data_list").html( html );
-            $(".dataTables-example").dataTable({"bSort": false,aLengthMenu: [ 20, 50]});
+            $("#data_list").html(html);
+            $(".dataTables-example").dataTable({"bSort": false, aLengthMenu: [20, 50]});
         }
-        $.ajax( ajaxSetting );
-    }();
+        $.ajax(ajaxSetting);
+    }
 
-    function getArticleDisabledStateHtml( articleId, disabled ) {
-        let html =  "<span class='article-disabled-state' onclick='enabledArticleState(this, "+ articleId +","+ disabled +")'  name='article_state' article_id='"+ articleId +"' disabled='"+ disabled +"'";
-        if(disabled == 1) {
+    function getArticleDisabledStateHtml(articleId, disabled) {
+        let html = "<span class='article-disabled-state' onclick='enabledArticleState(this, " + articleId + "," + disabled + ")'  name='article_state' article_id='" + articleId + "' disabled='" + disabled + "'";
+        if (disabled == 1) {
             html += " style='color:red;'>未发布</span>";
         } else {
             html += "'>已发布</span>"
@@ -224,9 +364,9 @@
         return html;
     }
 
-    function enabledArticleState( btnElement, articleId, disabled ) {
+    function enabledArticleState(btnElement, articleId, disabled) {
         let newState = disabled ^ 1
-        $.get("/admin/article_disabled?id=" + articleId, function(){
+        $.get("/admin/article_disabled?id=" + articleId, function () {
             $(btnElement).parent().html(getArticleDisabledStateHtml(articleId, newState));
         });
     }
@@ -241,9 +381,9 @@
             ajaxSetting.type = 'GET';
             ajaxSetting.dataType = 'JSON';
             ajaxSetting.success = function (response) {
-                parent.layer.msg(response.Message, {time: 1000},()=>{
+                parent.layer.msg(response.Message, {time: 1000}, () => {
                     if (response.Code == 0) {
-                       // window.location.href = "_article_list.html";
+                        // window.location.href = "_article_list.html";
                         $(target).parents("tr").remove();
                     }
                 });
@@ -251,6 +391,15 @@
             $.ajax(ajaxSetting);
         });
     }
+
+    (function(){
+        let queryString = chhblog.queryString();
+        let cateId = queryString.get("cate_id");
+        let disabled = queryString.get("disabled");
+        let keyword = queryString.get("keyword");
+        load(cateId, disabled, keyword);
+    })();
+
 </script>
 
 </body>

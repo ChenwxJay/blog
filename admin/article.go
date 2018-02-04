@@ -61,7 +61,10 @@ func SetArticleCate(response http.ResponseWriter, request *http.Request) {
 }
 
 func ArticleList(response http.ResponseWriter, request *http.Request) {
-	articleList := articleModel.GetAll()
+	var cateId = request.FormValue("cate_id")
+	var disabled = request.FormValue("disabled")
+	var keyword = request.FormValue("keyword")
+	articleList := articleModel.GetAll(cateId,keyword,disabled)
 	json,_ := json.Marshal(articleList)
 	response.Write(json)
 }
