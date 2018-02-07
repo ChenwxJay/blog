@@ -349,7 +349,13 @@
                         </tr>`;
             }
             $("#data_list").html(html);
-            $(".dataTables-example").dataTable({"bSort": false, aLengthMenu: [20, 50]});
+            $(".dataTables-example").dataTable(
+                {
+                    "ordering": true,
+                    "order": [[ 0, 'desc' ]],
+                     aLengthMenu: [20, 50]
+                }
+            );
         }
         $.ajax(ajaxSetting);
     }

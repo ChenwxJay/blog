@@ -7,9 +7,9 @@
 .aspwebchh .calendar_tool .calendar_month div a{ width:100%; height:100%; text-decoration:none; color:#000; display:block;}
 .aspwebchh .calendar_tool .calendar_month div a:hover{ background:#00a0e9; color:#fff}
 .aspwebchh .calendar_tool .calendar_year{ float:left; width:80px;}
-.aspwebchh .calendar_tool .calendar_year .calendar_year_input{ width:47px; margin-left:3px; margin-right:3px; height:20px;}
-.aspwebchh .calendar_tool .calendar_year .calendar_year_left{ font-weight: bold; font-family: '宋体'; width: 10px; height: 19px; line-height: 20px; cursor: pointer;  text-align: center; color: #fff; border: medium none; background:#00a0e9}
-.aspwebchh .calendar_tool .calendar_year .calendar_year_right{ font-weight: bold; font-family: '宋体'; width: 10px; height: 19px; line-height: 20px; cursor: pointer; text-align: center; color: #fff; border: medium none; background:#00a0e9}
+.aspwebchh .calendar_tool .calendar_year .calendar_year_input{ width:52px; margin-left:3px; margin-right:3px; height:20px;}
+.aspwebchh .calendar_tool .calendar_year .calendar_year_left{ margin:0; padding: 0; font-weight: bold; font-family: '宋体'; width: 10px; height: 19px; line-height: 20px; cursor: pointer;  text-align: center; color: #fff; border: medium none; background:#00a0e9}
+.aspwebchh .calendar_tool .calendar_year .calendar_year_right{margin:0; padding: 0; font-weight: bold; font-family: '宋体'; width: 10px; height: 19px; line-height: 20px; cursor: pointer; text-align: center; color: #fff; border: medium none; background:#00a0e9}
 .aspwebchh .calendar_content{ height:120px; width:140px;}
 .aspwebchh .calendar_action{ width:140px; height:20px; width:85px; position:absolute; right:0; bottom:3px}
 .aspwebchh .calendar_action input{height: 18px; width: 35px; line-height: 18px; padding: 0pt; text-align: center; border: medium none; color: rgb(255, 255, 255); display: block; float: left; font-size: 12px; cursor: pointer; margin-left: 4px; background:#00a0e9;}

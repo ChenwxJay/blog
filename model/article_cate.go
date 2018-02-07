@@ -15,6 +15,18 @@ const(
 
 type ArticleCate struct {}
 
+func ( self * ArticleCate ) GetEnabledArticleCates()  []map[string]string {
+	var sql = `select id, name
+					from article_category
+					where id in (select cate_id
+                          from article_categories
+                          where article_id in (select id
+                                                    from v_enabled_article))
+          order by num  ASC `
+	result := DbHelper.GetDataBase().Query(sql)
+	return result
+}
+
 func ( self * ArticleCate ) GetCates( orderByNum orderByNum )  []map[string]string {
 	var orderByString = ""
 	if orderByNum == OrderByNumAsc {

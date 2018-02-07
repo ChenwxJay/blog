@@ -13,9 +13,10 @@ func main() {
 	//检查配置文件
 	config_manager.CheckConfig()
 
+	//同步前缓存的类别数据
+	web.InitSyncArticleCates()
 	//前端
 	http.HandleFunc("/put_url_to_baidu", web.PutUrlToBaidu )
-
 	http.Handle("/log/", http.FileServer(http.Dir(".")))
 	http.Handle("/html/", http.FileServer(http.Dir(".")))
 	http.Handle("/upload/", http.FileServer(http.Dir(".")))
@@ -23,6 +24,8 @@ func main() {
 	http.Handle("/", new(web.Index))
 	http.Handle("/index", new(web.Index))
 	http.Handle("/article_view", new(web.ArticleView))
+	//手机端
+	http.Handle("/mobile/article_view", new(web.ArticleViewForMobile))
 
 	//后端
 	http.HandleFunc("/admin/login", admin.Login )

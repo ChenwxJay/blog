@@ -4,12 +4,22 @@ import(
 	"net/http"
 	//"../db_helper"
 	"../common"
-	"../model"
 	"strings"
 	"strconv"
+	"time"
 )
 
+var articleCates = make([]map[string]string,0)
 
+func InitSyncArticleCates()  {
+	articleCates = articleCateModel.GetEnabledArticleCates()
+	go func() {
+		ticker := time.NewTicker(time.Second * 60)
+		for range ticker.C {
+			articleCates = articleCateModel.GetEnabledArticleCates()
+		}
+	}()
+}
 
 type Index struct{
 	http.Handler
@@ -52,9 +62,8 @@ func attachArticleList( pageHtml string,   request *http.Request) string  {
 }
 
 func attachCateHtml( pageHtml string )  string {
-	cates := articleCateModel.GetCates( model.OrderByNumAsc)
 	var html = ""
-	for _, item := range cates {
+	for _, item := range articleCates {
 		html += `<li>
                			<a link-id=`+ item["id"] +` href="index?cate_id=`+ item["id"] +`" class="small">`+ item["name"] +`</a>
             		</li>`

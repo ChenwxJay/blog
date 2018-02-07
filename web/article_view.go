@@ -14,15 +14,20 @@ type ArticleView struct{
 	http.Handler
 }
 
+
 func ( self * ArticleView ) ServeHTTP( response http.ResponseWriter, request *http.Request ) {
+	handleArticleContent(response,request,"html/article_view.html")
+}
+
+func handleArticleContent(  response http.ResponseWriter, request *http.Request ,htmlPageTemplate string )  {
 	id, error := strconv.Atoi( request.FormValue("id") )
 	if error != nil {
 		response.Write([]byte("参数错误"))
-		return 
+		return
 	}
 	var pageContentOut = make(chan string)
 	go func() {
-		var pageContent = common.GetFileContent("html/article_view.html")
+		var pageContent = common.GetFileContent(htmlPageTemplate)
 		pageContentOut <- pageContent
 		close(pageContentOut)
 	}()
@@ -73,3 +78,13 @@ func code( content string ) string {
 		return str
 	})
 }
+
+
+type ArticleViewForMobile struct{
+	http.Handler
+}
+
+func ( self * ArticleViewForMobile ) ServeHTTP( response http.ResponseWriter, request *http.Request ) {
+	handleArticleContent(response,request,"html/mob_article_view.html")
+}
+
