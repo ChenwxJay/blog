@@ -22,7 +22,7 @@ func ( self * ArticleCate ) GetEnabledArticleCates()  []map[string]string {
                           from article_categories
                           where article_id in (select id
                                                     from v_enabled_article))
-          order by num  ASC `
+          	   order by num  ASC`
 	result := DbHelper.GetDataBase().Query(sql)
 	return result
 }

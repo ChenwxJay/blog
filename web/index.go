@@ -26,7 +26,11 @@ type Index struct{
 }
 
 func ( self * Index ) ServeHTTP( response http.ResponseWriter, request *http.Request ) {
-	pageContent := common.GetFileContent("html/default.html")
+	handleContent( response, request,"html/default.html" )
+}
+
+func handleContent(response http.ResponseWriter, request *http.Request , templateString string )  {
+	pageContent := common.GetFileContent( templateString )
 	pageContent = attachCateHtml( pageContent )
 	pageContent = attachArticleList(pageContent,request)
 	pageContent = setClientResourceVersion(pageContent)
@@ -71,3 +75,4 @@ func attachCateHtml( pageHtml string )  string {
 	pageHtml = strings.Replace(pageHtml,"${cates}",html,-1)
 	return pageHtml
 }
+

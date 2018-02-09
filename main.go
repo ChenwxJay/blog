@@ -24,7 +24,10 @@ func main() {
 	http.Handle("/", new(web.Index))
 	http.Handle("/index", new(web.Index))
 	http.Handle("/article_view", new(web.ArticleView))
+	http.HandleFunc("/article_comment", web.AddArticleComment)
 	//手机端
+	http.Handle("/mobile/", new(web.IndexForMobile))
+	http.Handle("/mobile/index", new(web.IndexForMobile))
 	http.Handle("/mobile/article_view", new(web.ArticleViewForMobile))
 
 	//后端

@@ -12,6 +12,7 @@ var articleModel = model.Article{}
 var articleCateModel = model.ArticleCate{}
 var articleVisitInfoModel = model.ArticleVisitInfo{}
 var loginModel = model.Login{}
+var articleCommentModel = model.ArticleComment{}
 
 func setClientResourceVersion( pageContent string ) string {
 	var version = config_manager.GetConfig().ClientResourceVersion

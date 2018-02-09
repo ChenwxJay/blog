@@ -235,27 +235,11 @@ func (self *Article) GetEnableArticleList( pager common.Pager, cateId int, kw st
 	var pageSize = pager.GetPageSize()
 	kw = common.Trim(kw)
 	var limit = strconv.Itoa(start) + "," + strconv.Itoa(pageSize)
-	//var where = " 1=1"
 	var orderBy = " order by id desc "
 	var ids = ""
 	args := make([]interface{},0)
 	var cateIdString = strconv.Itoa( cateId )
 	var where = self.getWhere(cateIdString,kw,"")
-	//if cateId != 0 {
-	//	where += " and id in (select article_id from article_categories where cate_id in (select DISTINCT(id) from article_category where pid = "+ cateIdString +"  or id = "+ cateIdString +"))"
-	//}
-	//if kw != "" {
-	//	var lexemeResult = common.LexemeFind( kw, common.ARTICLE_LEXEME_TYPE, 1, math.MaxInt32 )
-	//	if lexemeResult.DataCount > 0  {
-	//		ids = self.lexemeInCondition(lexemeResult.DataList)
-	//		if ids != "" {
-	//			where += " and id in (" + ids + ")"
-	//			orderBy = ""
-	//		}
-	//	} else {
-	//		where += " and 1 = 2 "
-	//	}
-	//}
 	var countSql = "select count(1) from v_enabled_article where " + where
 	var sql = "select id , title from v_enabled_article where "+ where +  orderBy + " limit " + limit
 	dataCount,_:= strconv.Atoi( DbHelper.GetDataBase().GetSingle(countSql,args...) )
