@@ -21,6 +21,10 @@ func AddArticleComment( response http.ResponseWriter, request *http.Request )  {
 		return
 	}
 	var iArticleId,_ = strconv.Atoi(articleId)
-	articleCommentModel.Add(iArticleId,content,nick,email,fromIp)
-	response.Write(common.JsonData(1,"评论成功",nil))
+	var success, msg = articleCommentModel.Add(iArticleId,content,nick,email,fromIp)
+	var code = 0
+	if success {
+		code = 1
+	}
+	response.Write(common.JsonData(code,msg,nil))
 }
