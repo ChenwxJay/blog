@@ -4,6 +4,7 @@ import "net/http"
 import (
 	"../common"
 	"strconv"
+	"encoding/json"
 )
 
 func AddArticleComment( response http.ResponseWriter, request *http.Request )  {
@@ -27,4 +28,15 @@ func AddArticleComment( response http.ResponseWriter, request *http.Request )  {
 		code = 1
 	}
 	response.Write(common.JsonData(code,msg,nil))
+}
+
+func ListArticleComment( response http.ResponseWriter, request *http.Request )  {
+	var articleId = request.FormValue("article_id")
+	var iArticleId,err = strconv.Atoi(articleId)
+	var result = make([]map[string]string,0)
+	if err == nil {
+		result = articleCommentModel.List(iArticleId)
+	}
+	var listJson,_ = json.Marshal(result)
+	response.Write(listJson)
 }

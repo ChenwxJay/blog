@@ -25,7 +25,7 @@ func ( self * ArticleComment ) Add ( articleId int, content string, nick string,
 	go func() {
 		var sql = "select id,add_time from article_comment where from_ip = ? order by id desc"
 		var result = DbHelper.GetDataBase().Query(sql,ip)
-		if  len(result) >= 3{
+		if  len(result) >= 10{
 			canCommentOut <- false
 		} else {
 			if len(result) == 0 {
@@ -57,4 +57,10 @@ func ( self * ArticleComment ) Add ( articleId int, content string, nick string,
 	var sql = "insert into article_comment(nick_name, content, from_ip, email, add_time, article_id) values(?,?,?,?,current_timestamp(),?)"
 	DbHelper.GetDataBase().ExecuteSql(sql,nick,content,ip,email,articleId)
 	return true ,"评论成功"
+}
+
+func ( self * ArticleComment ) List ( articleId int ) []map[string]string {
+	var sql = "select * from article_comment where article_id = ? order by id desc"
+	var result = DbHelper.GetDataBase().Query(sql,articleId)
+	return result
 }
