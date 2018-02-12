@@ -27,7 +27,7 @@
         <div class="col-sm-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>类别列表
+                    <h5>留言列表
                     </h5>
                     <div class="ibox-tools">
                         <a class="collapse-link">
@@ -52,10 +52,12 @@
                     <table class="table table-striped table-bordered table-hover dataTables-example">
                         <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>类别名称</th>
-                            <th>排序号码</th>
-                            <th>添加时间</th>
+                            <th>文章</th>
+                            <th>内容</th>
+                            <th>IP地址</th>
+                            <th>姓名</th>
+                            <th>邮箱</th>
+                            <th>时间</th>
                             <th>操作</th>
                         </tr>
                         </thead>
@@ -82,7 +84,7 @@
 <script>
     function load() {
         let ajaxSetting = {};
-        ajaxSetting.url = "/admin/cate_list";
+        ajaxSetting.url = "/admin/comment_list";
         ajaxSetting.type = 'GET';
         ajaxSetting.dataType = 'JSON';
         ajaxSetting.success = function ( response ) {
@@ -90,13 +92,14 @@
             for(var i = 0; i < response.length; i++) {
                 let item = response[i];
                 html += `<tr class="gradeA">
-                            <td>${item.id}</td>
-                            <td> <a href="/index?cate_id=${item.id}" target="_blank">${item.name}</a></td>
-                            <td>${item.num}</td>
-                            <td class="center">${item.add_date}</td>
+                            <td>${item.article_title}</td>
+                            <td style="width: 40%"><a href="/article_view?id=${item.article_id}&pos=comment_${item.id}" target="_blank">${item.content}</a></td>
+                            <td>${item.from_ip}</td>
+                            <td>${item.nick_name}</td>
+                            <td>${item.email}</td>
+                            <td>${item.add_time}</td>
                             <td class="center">
-                                <a href="javascript:parent.newTab('_article_cate_form.html?id=${item.id}','编辑文章')">编辑</a>
-                                <a href="javascript:;" onclick="del(${item.id})">删除</a>
+                                <a href="javascript:;" onclick="del(${item.id}, this)">删除</a>
                             </td>
                         </tr>`;
             }
@@ -108,19 +111,19 @@
 
     load();
 
-    function del(id) {
+    function del(id,target) {
         parent.layer.confirm('确定要删除此项吗？', {
             btn: ['确定', '取消'],
             shade: false
         }, function () {
             let ajaxSetting = {};
-            ajaxSetting.url = "/admin/cate_del?id=" + id;
+            ajaxSetting.url = "/admin/comment_del?id=" + id;
             ajaxSetting.type = 'GET';
             ajaxSetting.dataType = 'JSON';
             ajaxSetting.success = function (response) {
                 parent.layer.msg(response.Message, {time: 1000},()=>{
                     if (response.Code == 0) {
-                        window.location.href = "_article_cate_list.html";
+                        $(target).parents("tr").remove();
                     }
                 });
             }

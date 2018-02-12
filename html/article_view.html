@@ -32,43 +32,17 @@
         日期：${time}
     </div>
     <div class="comment">
-        <h3 class="comment-head">留言(50条)</h3>
-        <ul>
-            <li>
-                <p class="row1">网友 说：</p>
-                <p class="row2">这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错
-                    这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错这个写的不错</p>
-                <p class="row3">2017-11-11 21:09:10</p>
-            </li>
-            <li>
-                <p class="row1">网友 说：</p>
-                <p class="row2">这个写的不错</p>
-                <p class="row3">2017-11-11 21:09:10</p>
-            </li>
-            <li>
-                <p class="row1">网友 说：</p>
-                <p class="row2">这个写的不错</p>
-                <p class="row3">2017-11-11 21:09:10</p>
-            </li>
-            <li>
-                <p class="row1">网友 说：</p>
-                <p class="row2">这个写的不错</p>
-                <p class="row3">2017-11-11 21:09:10</p>
-            </li>
-            <li>
-                <p class="row1">网友 说：</p>
-                <p class="row2">这个写的不错</p>
-                <p class="row3">2017-11-11 21:09:10</p>
-            </li>
-            <li>
-                <p class="row1">网友 说：</p>
-                <p class="row2">这个写的不错</p>
-                <p class="row3">2017-11-11 21:09:10</p>
-            </li>
+        <h3 class="comment-head" id="comment-head">
+            留言(0条)
+        </h3>
+        <ul id="comment-list-container">
+
         </ul>
         <div class="form">
-            <h3>我要发表留言</h3>
-            <textarea></textarea>
+            <h3>
+                我要发表留言
+            </h3>
+            <textarea id="content"></textarea>
             <table>
                 <tr>
                     <th>您的大名</th>
@@ -96,14 +70,135 @@
         <img src="/html/style/2dcode.jpg" />
     </div>
 </div>
-</body>
+
+
+<div class="social">
+    <a href="/">首页</a>
+    &nbsp;&nbsp;
+    <a href="https://github.com/aspwebchh" target="_blank">GitHub</a>
+    <a href="https://www.zhihu.com/people/aspwebchh/activities" target="_blank">知乎</a>
+    <a href="https://www.douban.com/people/honghong1987/" target="_blank">豆瓣</a>
+    <a href="http://www.cnblogs.com/aspwebchh/" target="_blank">博客园</a>
+</div>
+
+
 <script src="/html/script/jquery-3.1.1.min.js?v=${client_resource_version}"></script>
 <link rel="stylesheet" href="/html/script/tomorrow-night.css?v=${client_resource_version}">
 <script src="/html/script/highlight.pack.js?v=${client_resource_version}"></script>
+<script src="/html/script/common.js?v=${client_resource_version}"></script>
 <script>hljs.initHighlightingOnLoad();</script>
+
 <script type="text/javascript">
+//点击文章中的图片在新窗口打开图片
 $("img").bind("click", function(){
     window.open(this.src);
 }).css("cursor","pointer");
+
+
+//留言相关
+function getArticleId() {
+    let queryString = chhblog.queryString();
+    let articleId = queryString.get("id");
+    if (articleId == null || articleId == "") {
+        return "";
+    }
+    return articleId;
+}
+
+function listComment() {
+    let articleId = getArticleId();
+    if (articleId == "") {
+        return;
+    }
+    let ajaxSetting = new Object;
+    ajaxSetting.url = "/list_article_comment?article_id=" + articleId;
+    ajaxSetting.dataType = "JSON";
+    ajaxSetting.success = function( commentList ) {
+        let listHtml = commentList.map( item =>{
+            var itemHtml = `<li id="comment_${item.id}">
+                <p class="row1">${item.nick_name ? item.nick_name : "网友"} 说：</p>
+                <p class="row2"><pre>${item.content}</pre></p>
+                <p class="row3">${item.add_time}</p>
+            </li>`;
+            return itemHtml;
+        }).join("");
+        $("#comment-list-container").html( listHtml );
+        $("#comment-head").html("留言("+ commentList.length +"条)");
+        let posId = chhblog.queryString().get("pos");
+        if(posId) {
+            position2CommentItem(posId);
+        }
+    }
+    $.ajax(ajaxSetting)
+}
+
+function position2CommentItem( commentEleId ) {
+    let ele = $("#" + commentEleId);
+    let top = ele.offset().top;
+    $(window).scrollTop(top);
+}
+
+function position2CommentHead() {
+    let head = $("#comment-head");
+    let top = head.offset().top;
+    $(window).scrollTop(top);
+}
+
+function clearForm() {
+    $("#name").val("");
+    $("#email").val("");
+    $("#content").val("");
+}
+
+function addComment() {
+    let isEmail = function(email) {
+        var regex = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+        return regex.test(email);
+    }
+
+    $("#submit-btn").bind("click", function(){
+        let articleId = getArticleId();
+        let name = $.trim( $("#name").val() );
+        let email = $.trim( $("#email").val() );
+        let content = $.trim( $("#content").val() );
+        if (articleId == "") {
+            return;
+        }
+        if (content == "") {
+            alert("请输入留言内容");
+            return;
+        }
+         if( email != "" && !isEmail(email)) {
+            alert("请正确输入邮箱");
+            return;
+        }
+
+        let ajaxSetting = new Object();
+        ajaxSetting.url = "/add_article_comment";
+        ajaxSetting.type = "POST";
+        ajaxSetting.dataType = "JSON";
+        ajaxSetting.data = {
+            article_id: articleId,
+            content: content,
+            email: email,
+            nick: name
+        };
+        ajaxSetting.success = function( response ) {
+            if( response.Code == 1 ) {
+                alert(response.Message);
+                return;
+            }
+            listComment();
+            position2CommentHead();
+            clearForm();
+        };
+        $.ajax( ajaxSetting );
+    });
+}
+
+listComment();
+addComment();
+//留言相关，结束
 </script>
+</body>
 </html>

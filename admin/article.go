@@ -9,6 +9,22 @@ import (
 )
 
 
+func ListAllForArticleComment(response http.ResponseWriter, request *http.Request) {
+	var articleCommentJson,_ = json.Marshal( articleCommentModel.ListAll() )
+	response.Write(articleCommentJson)
+}
+
+func DeleteArticleComment(response http.ResponseWriter, request *http.Request) {
+	var commentId = request.FormValue("id")
+	var iCommentId,err = strconv.Atoi(commentId)
+	if err != nil {
+		response.Write(JsonData(1,err.Error(),nil))
+	} else {
+		articleCommentModel.Delete(iCommentId)
+		response.Write(JsonData(0,"删除成功",nil))
+	}
+}
+
 func CateItem(response http.ResponseWriter, request *http.Request) {
 	var id = request.FormValue("id")
 	var iid,_ = strconv.Atoi(id)
@@ -70,10 +86,6 @@ func ArticleList(response http.ResponseWriter, request *http.Request) {
 }
 
 func ArticleAdd(response http.ResponseWriter, request *http.Request) {
-	if !loginModel.IsLogin(request) {
-		response.Write(LoginErrorResponse())
-		return
-	}
 	var title = request.FormValue("title")
 	var cate = request.FormValue("cate")
 	var author = request.FormValue("author")
@@ -88,10 +100,6 @@ func ArticleAdd(response http.ResponseWriter, request *http.Request) {
 
 
 func ArticleEdit(response http.ResponseWriter, request *http.Request) {
-	if !loginModel.IsLogin(request) {
-		response.Write(LoginErrorResponse())
-		return
-	}
 	var title = request.FormValue("title")
 	var cate = request.FormValue("cate")
 	var author = request.FormValue("author")
@@ -107,10 +115,6 @@ func ArticleEdit(response http.ResponseWriter, request *http.Request) {
 }
 
 func ArticleDel(response http.ResponseWriter, request *http.Request) {
-	if !loginModel.IsLogin(request) {
-		response.Write(LoginErrorResponse())
-		return
-	}
 	var id = request.FormValue("id")
 	var intId ,_ = strconv.Atoi(id)
 	articleModel.DelArticle(intId)

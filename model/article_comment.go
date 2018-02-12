@@ -3,6 +3,7 @@ package model
 import (
 	"../db_helper"
 	"time"
+	"../common"
 )
 
 type ArticleComment struct {}
@@ -33,8 +34,7 @@ func ( self * ArticleComment ) Add ( articleId int, content string, nick string,
 			} else {
 				var item = result[0]
 				var addTime = item["add_time"]
-				loc, _ := time.LoadLocation("Local")
-				var dAddTime ,_ = time.ParseInLocation("2006-01-02 15:04:05", addTime,loc)
+				var dAddTime = common.String2DateTime(addTime)
 				var diff = time.Now().Sub(dAddTime)
 				if diff.Seconds() < 60 {
 					canCommentOut <- false
@@ -63,4 +63,17 @@ func ( self * ArticleComment ) List ( articleId int ) []map[string]string {
 	var sql = "select * from article_comment where article_id = ? order by id desc"
 	var result = DbHelper.GetDataBase().Query(sql,articleId)
 	return result
+}
+
+func ( self * ArticleComment ) ListAll () []map[string]string {
+	var sql = `select *,
+					(select title from article where id = article_comment.article_id) as article_title
+                     from article_comment order by id desc`
+	var result = DbHelper.GetDataBase().Query(sql)
+	return result
+}
+
+func ( self * ArticleComment ) Delete ( commentId int ){
+	var sql = "delete from article_comment where id = ?"
+	DbHelper.GetDataBase().Query(sql, commentId)
 }

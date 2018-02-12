@@ -148,7 +148,8 @@ func (self *Article) GetAll(cateId string,  keyword string,disabled string) []ma
 							on a.cate_id = b.id
 							GROUP BY article_id`
 	var articleSql = `select id, title, author ,add_time, disabled, 
-							(select count(1) from visit_info where article_id = article.id) as visit_count 
+							(select count(1) from visit_info where article_id = article.id) as visit_count,
+							(select count(1) from article_comment where article_id = article.id) as comment_count
 							from article where ` + where + ` order by id desc`
 	var articleCateOut = make(chan []map[string]string)
 	var articleListOut = make(chan []map[string]string)

@@ -79,7 +79,7 @@
     ( function(){
         var cateId = chhblog.queryString().get("cate_id");
         if( cateId ) {
-            $('[link-id='+ cateId +']').css("color", "#dd4b39");
+            $('[link-id='+ cateId +']').css("color", "#dd4b39").parent().css("color", "#dd4b39");
         }
     })();
 </script>

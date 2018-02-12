@@ -16,13 +16,18 @@ const(
 type ArticleCate struct {}
 
 func ( self * ArticleCate ) GetEnabledArticleCates()  []map[string]string {
-	var sql = `select id, name
-					from article_category
-					where id in (select cate_id
-                          from article_categories
-                          where article_id in (select id
-                                                    from v_enabled_article))
-          	   order by num  ASC`
+	var sql = `select id,
+				name,
+			   (select count(1)
+				from article_categories
+				 where cate_id = article_category.id and
+						  article_id in (select id from v_enabled_article) ) as article_count
+							from article_category
+							where id in (select cate_id
+								  from article_categories
+								  where article_id in (select id
+															from v_enabled_article))
+					   order by num  ASC`
 	result := DbHelper.GetDataBase().Query(sql)
 	return result
 }

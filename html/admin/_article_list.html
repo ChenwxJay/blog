@@ -95,10 +95,13 @@
 
                             </label>
                             <div class="col-sm-2">
-
+                                <button class="btn btn-primary" id="search_btn">筛选</button>
+                                &nbsp;
+                                <button type="button" class="btn btn-default" id="reset_btn">重置</button>
                             </div>
                         </div>
 
+                        <!--
                         <div class="hr-line-dashed"></div>
 
                         <div class="form-group"  style="margin-bottom: 1px;">
@@ -108,6 +111,7 @@
                                 <button type="button" class="btn btn-default" id="reset_btn">重置</button>
                             </div>
                         </div>
+                        -->
                     </form>
                 </div>
             </div>
@@ -149,6 +153,7 @@
                             <th>来源</th>
                             <th>时间</th>
                             <th>阅读量</th>
+                            <th>留言数量</th>
                             <th>状态</th>
                             <th>操作</th>
                         </tr>
@@ -339,6 +344,7 @@
                             <td>${item.author}</td>
                             <td class="center">${item.add_time}</td>
                             <td>${item.visit_count}</td>
+                            <td>${item.comment_count}</td>
                             <td>
                                 ${getArticleDisabledStateHtml(item.id, item.disabled)}
                             </td>

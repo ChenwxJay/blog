@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"../common/logger"
 	"strconv"
+	"time"
 )
 
 func IsNullOrEmpty( str string ) bool{
@@ -108,4 +109,14 @@ func IntArray2StringArray( intArray []int) []string  {
 		result = append(result,strconv.Itoa(item))
 	}
 	return result
+}
+
+func String2DateTime( dateTimeString string ) time.Time  {
+	var loc, _ = time.LoadLocation("Local")
+	var time ,_ = time.ParseInLocation("2006-01-02 15:04:05", dateTimeString,loc)
+	return time
+}
+
+func DateTime2String( dateTime time.Time) string  {
+	return dateTime.Format("2006年01月02日 15:04")
 }

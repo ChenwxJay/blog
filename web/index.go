@@ -69,7 +69,7 @@ func attachCateHtml( pageHtml string )  string {
 	var html = ""
 	for _, item := range articleCates {
 		html += `<li>
-               			<a link-id=`+ item["id"] +` href="index?cate_id=`+ item["id"] +`" class="small">`+ item["name"] +`</a>
+               			<a link-id=`+ item["id"] +` href="index?cate_id=`+ item["id"] +`" class="small">`+ item["name"] +`</a>（`+ item["article_count"] +`）
             		</li>`
 	}
 	pageHtml = strings.Replace(pageHtml,"${cates}",html,-1)
