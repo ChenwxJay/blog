@@ -11,6 +11,7 @@ type configs struct  {
 	LexemeUrl string
 	LexemeKey string
 	ClientResourceVersion string
+	Port string
 }
 
 var configData *configs
@@ -66,6 +67,9 @@ func CheckConfig()  {
 		}
 		if config.LexemeUrl == "" {
 			panic("分词系统URL未配置")
+		}
+		if config.Port == "" {
+			panic("端口号未配置")
 		}
 
 	} else {

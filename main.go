@@ -58,6 +58,6 @@ func main() {
 	http.HandleFunc("/ueditor/go/controller", ueditor.Controller)
 	http.Handle("/static/", http.FileServer(http.Dir(".")))
 
-	http.ListenAndServe(":9529", nil)
+	http.ListenAndServe(":" + config_manager.GetConfig().Port, nil)
 }
 
