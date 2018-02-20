@@ -3,10 +3,10 @@ package web
 import(
 	"net/http"
 	"../common"
-	"../model"
 	"strconv"
 	"strings"
 	"regexp"
+	"../cache"
 )
 
 
@@ -33,8 +33,9 @@ func handleArticleContent(  response http.ResponseWriter, request *http.Request 
 	}()
 	var articleDataOut = make( chan map[string]string )
 	go func() {
-		var article = model.Article{}
-		var data = article.GetArticle(id)
+		//var article = model.Article{}
+		//var data = article.GetArticle(id)
+		var data = cache.GetArticle(id)
 		articleDataOut <- data
 		close(articleDataOut)
 	}()

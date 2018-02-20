@@ -9,7 +9,7 @@ import (
 	"errors"
 	"regexp"
 	"encoding/json"
-	"./config_manger"
+	"./config_manager"
 )
 
 func interface2Error(data interface{}) error {

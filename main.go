@@ -3,9 +3,10 @@ package main
 import (
 	"./web"
 	"./admin"
-	"net/http"
 	"./admin/ueditor"
-	"./common/config_manger"
+	"./common/config_manager"
+	"net/http"
+	"./cache"
 )
 
 
@@ -13,7 +14,7 @@ func main() {
 	//检查配置文件
 	config_manager.CheckConfig()
 	//同步前缓存的类别数据
-	web.InitSyncArticleCates()
+	cache.InitClientCache()
 	//前端
 	http.HandleFunc("/put_url_to_baidu", web.PutUrlToBaidu )
 	http.Handle("/log/", http.FileServer(http.Dir(".")))

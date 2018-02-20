@@ -6,20 +6,9 @@ import(
 	"../common"
 	"strings"
 	"strconv"
-	"time"
+	"../cache"
 )
 
-var articleCates = make([]map[string]string,0)
-
-func InitSyncArticleCates()  {
-	articleCates = articleCateModel.GetEnabledArticleCates()
-	go func() {
-		ticker := time.NewTicker(time.Second * 60)
-		for range ticker.C {
-			articleCates = articleCateModel.GetEnabledArticleCates()
-		}
-	}()
-}
 
 type Index struct{
 	http.Handler
@@ -67,6 +56,7 @@ func attachArticleList( pageHtml string,   request *http.Request) string  {
 
 func attachCateHtml( pageHtml string )  string {
 	var html = ""
+	var articleCates = cache.GetArticleCates()
 	for _, item := range articleCates {
 		html += `<li>
                			<a link-id=`+ item["id"] +` href="index?cate_id=`+ item["id"] +`" class="small">`+ item["name"] +`</a>（`+ item["article_count"] +`）

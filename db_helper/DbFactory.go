@@ -1,7 +1,7 @@
 package DbHelper
 
 import (
-	"../common/config_manger"
+	"../common/config_manager"
 	"../common/logger"
 )
 

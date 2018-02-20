@@ -3,7 +3,7 @@ package web
 import (
 	"../model"
 	"strings"
-	"../common/config_manger"
+	"../common/config_manager"
 	"net/http"
 	"../common"
 )
