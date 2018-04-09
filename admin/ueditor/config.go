@@ -2,22 +2,20 @@ package ueditor
 
 import (
 	"bytes"
-	"log"
 	"os"
+	"net/http"
 )
 
-var configJson []byte // 当客户端请求 /ueditor/go/controller?action=config 返回的json内容
-
-func init() {
-	file, err := os.Open("config.json")
+func config(w http.ResponseWriter, r *http.Request) {
+	var file, err = os.Open("config.json")
+	var configJson  []byte
 	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
+		configJson = []byte("{}")
+	} else {
+		defer file.Close()
+		buf := bytes.NewBuffer(nil)
+		buf.ReadFrom(file)
+		configJson = buf.Bytes()
 	}
-
-	defer file.Close()
-	buf := bytes.NewBuffer(nil)
-	buf.ReadFrom(file)
-
-	configJson = buf.Bytes()
+	w.Write(configJson)
 }

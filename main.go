@@ -9,12 +9,15 @@ import (
 	"./cache"
 )
 
-
-func main() {
+func init() {
 	//检查配置文件
 	config_manager.CheckConfig()
 	//同步前缓存的类别数据
 	cache.InitClientCache()
+}
+
+
+func main() {
 	//前端
 	http.HandleFunc("/put_url_to_baidu", web.PutUrlToBaidu )
 	http.Handle("/log/", http.FileServer(http.Dir(".")))
