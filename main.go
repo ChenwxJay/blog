@@ -58,8 +58,8 @@ func main() {
 
 	http.HandleFunc("/get_ip_info", web.GetIpInfo)
 
-	//UEditor上传图片
-	http.HandleFunc("/ueditor/go/controller", ueditor.Controller)
+	//UEditor上传相关
+	http.HandleFunc("/ueditor/go", ueditor.UEditor)
 	http.Handle("/static/", http.FileServer(http.Dir(".")))
 
 	http.ListenAndServe(":" + config_manager.GetConfig().Port, nil)

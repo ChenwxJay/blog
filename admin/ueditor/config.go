@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func config(w http.ResponseWriter, r *http.Request) {
+func config(response http.ResponseWriter, request *http.Request) {
 	var file, err = os.Open("config.json")
 	var configJson  []byte
 	if err != nil {
@@ -17,5 +17,5 @@ func config(w http.ResponseWriter, r *http.Request) {
 		buf.ReadFrom(file)
 		configJson = buf.Bytes()
 	}
-	w.Write(configJson)
+	response.Write(configJson)
 }
