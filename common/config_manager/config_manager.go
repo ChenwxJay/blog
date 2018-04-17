@@ -12,6 +12,7 @@ type configs struct  {
 	LexemeKey string
 	ClientResourceVersion string
 	Port string
+	Redis string
 }
 
 var configData *configs
@@ -71,7 +72,9 @@ func CheckConfig()  {
 		if config.Port == "" {
 			panic("端口号未配置")
 		}
-
+		if config.Redis == "" {
+			panic("Redis未配置")
+		}
 	} else {
 		panic("配置文件读取失败")
 	}
