@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"../common"
 	"../model"
+	"../cache"
 )
 
 
@@ -106,6 +107,7 @@ func ArticleEdit(response http.ResponseWriter, request *http.Request) {
 	var content = request.FormValue("content")
 	var id,_ =  strconv.Atoi( request.FormValue("id") )
 	articleModel.EditArticle(id,title,cate,author,content)
+	cache.UpdateArticle(id)
 	go func() {
 		common.LexemeDelete(id,common.ARTICLE_LEXEME_TYPE)
 		common.LexemeCreate(id,common.ARTICLE_LEXEME_TYPE,title)
@@ -118,6 +120,7 @@ func ArticleDel(response http.ResponseWriter, request *http.Request) {
 	var id = request.FormValue("id")
 	var intId ,_ = strconv.Atoi(id)
 	articleModel.DelArticle(intId)
+	cache.UpdateArticle(intId)
 	go func() {
 		common.LexemeDelete(intId,common.ARTICLE_LEXEME_TYPE)
 	}()
