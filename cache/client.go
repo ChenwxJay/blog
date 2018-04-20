@@ -18,9 +18,10 @@ const KEY_ARTICLE_CATES  =  "article_cates"
 const KEY_ARTICLE  =  "article"
 
 func InitClientCache()  {
+	var config = config_manager.GetConfig()
 	client = redis.NewClient(&redis.Options{
-		Addr:    config_manager.GetConfig().Redis,
-		Password: "", // no password set
+		Addr:    config.Redis,
+		Password: config.RedisPassword, // no password set
 		DB:       0,  // use default DB
 	})
 }

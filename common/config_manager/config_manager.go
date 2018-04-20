@@ -13,6 +13,7 @@ type configs struct  {
 	ClientResourceVersion string
 	Port string
 	Redis string
+	RedisPassword string
 }
 
 var configData *configs
@@ -74,6 +75,9 @@ func CheckConfig()  {
 		}
 		if config.Redis == "" {
 			panic("Redis未配置")
+		}
+		if config.RedisPassword == "" {
+			panic("Redis密码未配置")
 		}
 	} else {
 		panic("配置文件读取失败")
